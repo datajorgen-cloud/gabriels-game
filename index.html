@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gabriel's Math Game</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  font-size: 2.2em;
+  color: #c0392b;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 0 #fff;
+}
+.mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.mode-btn {
+  padding: 12px 32px;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.mode-btn.mult { background: #e74c3c; color: white; }
+.mode-btn.div  { background: #3498db; color: white; }
+.mode-btn.active { transform: scale(1.1); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+.mode-btn:not(.active) { opacity: 0.55; }
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 32px;
+  max-width: 820px;
+  margin: 0 auto 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+/* Slider rows */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.slider-label {
+  font-size: 1em;
+  font-weight: bold;
+  color: #555;
+  width: 90px;
+  flex-shrink: 0;
+}
+input[type=range] {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: #e74c3c;
+  min-width: 0;
+}
+input[type=number].num-input {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #c0392b;
+  border: 2px solid #e74c3c;
+  border-radius: 8px;
+  padding: 4px 8px;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+}
+input[type=number].num-input::-webkit-inner-spin-button,
+input[type=number].num-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(231,76,60,0.15); }
+
+/* Visual area */
+.visual-area {
+  background: #fef9f0;
+  border-radius: 14px;
+  padding: 20px;
+  min-height: 100px;
+  margin-bottom: 20px;
+  border: 2px dashed #f0c080;
+}
+.visual-title {
+  font-size: 0.9em;
+  color: #888;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+.groups-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+.group {
+  background: #fff3e0;
+  border-radius: 10px;
+  padding: 5px 7px;
+  border: 2px solid #ffcc80;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: 160px;
+}
+.item { font-size: 1.2em; line-height: 1; }
+.too-many {
+  font-size: 1em;
+  color: #999;
+  font-style: italic;
+  padding: 10px;
+}
+
+/* Area model (rectangle) for large numbers */
+.area-model {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+}
+.area-rect {
+  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1em;
+  color: #7b2d42;
+  border: 2px solid #e0607a;
+}
+.area-labels {
+  display: flex;
+  gap: 20px;
+  font-size: 0.9em;
+  color: #888;
+}
+
+/* Answer reveal */
+.answer-area {
+  text-align: center;
+  margin-top: 8px;
+}
+.answer-area .equation {
+  font-size: 2em;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+.reveal-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 36px;
+  font-size: 1.1em;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.reveal-btn:hover { background: #219150; transform: scale(1.04); }
+.answer-box {
+  display: none;
+  margin-top: 14px;
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #e74c3c;
+  animation: pop 0.3s ease;
+}
+@keyframes pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Steps toggle */
+.steps-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  color: #555;
+  font-size: 1em;
+  font-weight: bold;
+  user-select: none;
+}
+.steps-toggle input { cursor: pointer; accent-color: #3498db; width: 18px; height: 18px; }
+.steps-area { display: none; }
+.steps-area.visible { display: block; }
+
+/* ── Long multiplication workings ── */
+.mult-workings {
+  font-family: 'Courier New', monospace;
+  font-size: 1.05em;
+}
+
+/* Column layout table */
+.col-table {
+  border-collapse: collapse;
+  margin: 0 auto 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 1.25em;
+}
+.col-table td {
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0;
+}
+.col-table td.op-cell {
+  width: 36px;
+  color: #888;
+  font-weight: bold;
+  text-align: right;
+  padding-right: 6px;
+}
+.col-table .carry-row td {
+  height: 20px;
+  font-size: 0.65em;
+  color: #e67e22;
+  font-weight: bold;
+  vertical-align: bottom;
+}
+.col-table .sep-row td {
+  border-top: 3px solid #555;
+  height: 6px;
+}
+.col-table .sep-row td.op-cell { border-top: none; }
+.col-table .result-row td {
+  color: #27ae60;
+  font-weight: bold;
+}
+.col-table .partial-row td {
+  color: #2980b9;
+}
+.col-table td.dim { color: #ccc; }
+
+/* Step-by-step explanation blocks */
+.step-section {
+  background: #f8f8ff;
+  border-left: 4px solid #e74c3c;
+  border-radius: 0 10px 10px 0;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+}
+.step-section.add-section {
+  border-left-color: #27ae60;
+}
+.step-title {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.05em;
+}
+.digit-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+.digit-step {
+  color: #555;
+  font-family: 'Courier New', monospace;
+  font-size: 0.98em;
+}
+.carry-num {
+  background: #e67e22;
+  color: white;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.85em;
+  font-weight: bold;
+  margin: 0 2px;
+}
+.partial-result {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #2980b9;
+  margin-top: 6px;
+  padding-left: 10px;
+}
+.place-note {
+  color: #999;
+  font-weight: normal;
+  font-size: 0.88em;
+}
+
+/* Long division workings */
+.div-workings {
+  font-family: 'Courier New', monospace;
+  font-size: 1.05em;
+  background: #f8f8ff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  border: 2px solid #d0d0ff;
+  white-space: pre;
+  line-height: 2;
+  overflow-x: auto;
+}
+.div-workings .step { color: #555; }
+.div-workings .result-line { color: #27ae60; font-weight: bold; }
+.div-workings .line-sep { color: #bbb; }
+</style>
+</head>
+<body>
+
+<h1>🍎 Gabriel's Math Game</h1>
+
+<div class="mode-buttons">
+  <button class="mode-btn mult active" onclick="setMode('mult')">✖ Multiplication</button>
+  <button class="mode-btn div"  onclick="setMode('div')">➗ Division</button>
+</div>
+
+<div class="card">
+  <div class="slider-row">
+    <span class="slider-label" id="labelA">First number</span>
+    <input type="range" id="sliderA" min="1" max="9999" value="24" oninput="syncFromSlider('A')">
+    <input type="number" id="inputA" class="num-input" min="1" max="9999" value="24" oninput="syncFromInput('A')">
+  </div>
+  <div class="slider-row">
+    <span class="slider-label" id="labelB">Second number</span>
+    <input type="range" id="sliderB" min="1" max="999" value="13" oninput="syncFromSlider('B')">
+    <input type="number" id="inputB" class="num-input" min="1" max="999" value="13" oninput="syncFromInput('B')">
+  </div>
+
+  <div class="visual-area" id="visualArea">
+    <div class="visual-title" id="visualTitle"></div>
+    <div class="groups-container" id="groupsContainer"></div>
+  </div>
+
+  <div class="answer-area">
+    <div class="equation" id="equation"></div>
+    <button class="reveal-btn" onclick="revealAnswer()">Show Answer</button>
+    <div class="answer-box" id="answerBox"></div>
+  </div>
+</div>
+
+<div class="card">
+  <label class="steps-toggle">
+    <input type="checkbox" id="stepsToggle" onchange="toggleSteps()">
+    Show step-by-step hand workings
+  </label>
+  <div class="steps-area" id="stepsArea">
+    <div id="workings"></div>
+  </div>
+</div>
+
+<script>
+let mode = 'mult';
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.mode-btn.' + (m === 'mult' ? 'mult' : 'div')).classList.add('active');
+
+  const sliderA = document.getElementById('sliderA');
+  const sliderB = document.getElementById('sliderB');
+  const inputA  = document.getElementById('inputA');
+  const inputB  = document.getElementById('inputB');
+
+  if (m === 'mult') {
+    document.getElementById('labelA').textContent = 'First number';
+    document.getElementById('labelB').textContent = 'Second number';
+    sliderA.max = 9999; inputA.max = 9999;
+    sliderB.max = 999;  inputB.max = 999;
+  } else {
+    document.getElementById('labelA').textContent = 'Dividend';
+    document.getElementById('labelB').textContent = 'Divisor';
+    sliderA.max = 9999; inputA.max = 9999;
+    sliderB.max = 999;  inputB.max = 999;
+  }
+  hideAnswer();
+  update();
+}
+
+function syncFromSlider(id) {
+  const val = document.getElementById('slider' + id).value;
+  document.getElementById('input' + id).value = val;
+  hideAnswer();
+  update();
+}
+
+function syncFromInput(id) {
+  let val = parseInt(document.getElementById('input' + id).value);
+  const slider = document.getElementById('slider' + id);
+  if (isNaN(val) || val < 1) val = 1;
+  const max = parseInt(slider.max);
+  if (val > max) val = max;
+  document.getElementById('input' + id).value = val;
+  slider.value = val;
+  hideAnswer();
+  update();
+}
+
+function getVals() {
+  return {
+    a: Math.max(1, parseInt(document.getElementById('inputA').value) || 1),
+    b: Math.max(1, parseInt(document.getElementById('inputB').value) || 1)
+  };
+}
+
+function hideAnswer() {
+  document.getElementById('answerBox').style.display = 'none';
+}
+function revealAnswer() {
+  document.getElementById('answerBox').style.display = 'block';
+}
+function toggleSteps() {
+  const area = document.getElementById('stepsArea');
+  area.classList.toggle('visible', document.getElementById('stepsToggle').checked);
+}
+
+function update() {
+  const { a, b } = getVals();
+  if (mode === 'mult') renderMultiplication(a, b);
+  else renderDivision(a, b);
+  if (document.getElementById('stepsToggle').checked)
+    document.getElementById('stepsArea').classList.add('visible');
+}
+
+/* ───────── MULTIPLICATION ───────── */
+function renderMultiplication(a, b) {
+  const total = a * b;
+  document.getElementById('equation').textContent = `${a} × ${b} = ?`;
+  document.getElementById('answerBox').textContent = `= ${total.toLocaleString()}`;
+  renderVisualMult(a, b, total);
+  document.getElementById('workings').innerHTML = buildMultWorkings(a, b);
+}
+
+function renderVisualMult(a, b, total) {
+  const container = document.getElementById('groupsContainer');
+  container.innerHTML = '';
+
+  if (total <= 80 && a <= 20 && b <= 20) {
+    document.getElementById('visualTitle').textContent =
+      `${a} group${a>1?'s':''} of ${b} 🍎`;
+    for (let g = 0; g < a; g++) {
+      const div = document.createElement('div');
+      div.className = 'group';
+      for (let i = 0; i < b; i++) {
+        const s = document.createElement('span');
+        s.className = 'item'; s.textContent = '🍎';
+        div.appendChild(s);
+      }
+      container.appendChild(div);
+    }
+  } else {
+    // Area model rectangle
+    document.getElementById('visualTitle').textContent =
+      `Area model: ${a} × ${b} = ${total.toLocaleString()}`;
+    const maxW = 340, maxH = 140;
+    const scale = Math.min(maxW / a, maxH / b, 2);
+    const w = Math.max(Math.round(a * scale), 60);
+    const h = Math.max(Math.round(b * scale), 40);
+    container.innerHTML = `
+      <div class="area-model">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.9em;color:#888;">${b}</div>
+          <div class="area-rect" style="width:${w}px;height:${h}px;">
+            ${a} × ${b}<br><span style="font-size:0.85em;opacity:0.8">= ${total.toLocaleString()}</span>
+          </div>
+        </div>
+        <div style="font-size:0.9em;color:#888;margin-left:22px;">${a}</div>
+      </div>`;
+  }
+}
+
+/* ───────── LONG MULTIPLICATION WORKINGS ───────── */
+function buildMultWorkings(a, b) {
+  const aStr = String(a);
+  const bStr = String(b);
+  const total = a * b;
+  const totalStr = String(total);
+
+  const numCols = totalStr.length;
+  const placeNames = ['ones', 'tens', 'hundreds', 'thousands', 'ten-thousands'];
+
+  // ── 1. Column layout table ──
+  // We need enough columns for the widest number
+  function makeColTable(rows) {
+    // rows: array of { type, op, digits, carries }
+    // digits: array of length numCols (null = empty)
+    let html = '<table class="col-table">';
+    rows.forEach(row => {
+      if (row.type === 'sep') {
+        html += `<tr class="sep-row">`;
+        html += `<td class="op-cell"></td>`;
+        for (let c = 0; c < numCols; c++) html += '<td></td>';
+        html += '</tr>';
+        return;
+      }
+      if (row.type === 'carry') {
+        html += `<tr class="carry-row">`;
+        html += `<td class="op-cell"></td>`;
+        for (let c = 0; c < numCols; c++) {
+          const v = row.digits[c];
+          html += `<td>${v != null && v !== 0 ? v : ''}</td>`;
+        }
+        html += '</tr>';
+        return;
+      }
+      const cls = row.type === 'result' ? 'result-row' :
+                  row.type === 'partial' ? 'partial-row' : '';
+      html += `<tr class="${cls}">`;
+      html += `<td class="op-cell">${row.op || ''}</td>`;
+      for (let c = 0; c < numCols; c++) {
+        const v = row.digits[c];
+        html += `<td class="${v == null ? 'dim' : ''}">${v != null ? v : '·'}</td>`;
+      }
+      html += '</tr>';
+    });
+    html += '</table>';
+    return html;
+  }
+
+  function numToDigitRow(n, op, type) {
+    const s = String(n);
+    const digits = new Array(numCols).fill(null);
+    for (let i = 0; i < s.length; i++) {
+      digits[numCols - s.length + i] = s[i];
+    }
+    return { type: type || 'number', op, digits };
+  }
+
+  // Compute partial products and carries for each digit of b
+  const partialInfos = [];
+  for (let i = bStr.length - 1; i >= 0; i--) {
+    const bDigit = parseInt(bStr[i]);
+    const shift = bStr.length - 1 - i;
+    const partialVal = a * bDigit;
+    const fullVal = partialVal * Math.pow(10, shift);
+
+    // Digit-by-digit carry computation
+    const aDigits = aStr.split('').map(Number);
+    let carry = 0;
+    const digitSteps = [];
+    for (let j = aDigits.length - 1; j >= 0; j--) {
+      const prod = aDigits[j] * bDigit + carry;
+      const write = prod % 10;
+      const newCarry = Math.floor(prod / 10);
+      digitSteps.unshift({ aDigit: aDigits[j], bDigit, carry, prod, write, newCarry });
+      carry = newCarry;
+    }
+    if (carry > 0) digitSteps.unshift({ aDigit: null, bDigit, carry: 0, prod: carry, write: carry, newCarry: 0, isFinalCarry: true });
+
+    // Carry row for the column table
+    // carry[j] = carry going INTO column (numCols-1-shift - (aStr.length-1-j))
+    // The carry from position j feeds into position j-1 of the result
+    const carryRow = new Array(numCols).fill(null);
+    let c2 = 0;
+    for (let j = aDigits.length - 1; j >= 0; j--) {
+      const prod = aDigits[j] * bDigit + c2;
+      c2 = Math.floor(prod / 10);
+      // carry c2 goes into the next (more significant) digit position
+      // in the partial result, digit j is at column (numCols - shift - (aStr.length - j))
+      const col = numCols - shift - (aStr.length - j) - 1;
+      if (c2 > 0 && col >= 0) carryRow[col] = c2;
+    }
+
+    partialInfos.push({ bDigit, shift, partialVal, fullVal, digitSteps, carryRow });
+  }
+
+  // Setup table rows
+  const tableRows = [
+    numToDigitRow(a, '', 'number'),
+    numToDigitRow(b, '×', 'number'),
+    { type: 'sep' },
+  ];
+
+  partialInfos.forEach(info => {
+    if (bStr.length > 1) {
+      tableRows.push({ type: 'carry', digits: info.carryRow });
+    }
+    tableRows.push(numToDigitRow(info.fullVal, bStr.length > 1 ? '+' : '', 'partial'));
+  });
+
+  if (bStr.length > 1) {
+    tableRows.push({ type: 'sep' });
+    tableRows.push(numToDigitRow(total, '', 'result'));
+  }
+
+  let html = '<div class="mult-workings">';
+  html += '<div style="text-align:center;font-weight:bold;color:#888;margin-bottom:12px;font-size:0.95em;">Column method — aligned by place value</div>';
+  html += makeColTable(tableRows);
+
+  // ── 2. Step-by-step digit explanations ──
+  partialInfos.forEach((info, idx) => {
+    const stepNum = idx + 1;
+    const placeName = placeNames[info.shift] || `×10<sup>${info.shift}</sup>`;
+    const shiftNote = info.shift > 0
+      ? ` — <span class="place-note">this is the <em>${placeName}</em> digit of ${b}, so shift result ${info.shift} place${info.shift>1?'s':''} left (add ${info.shift} zero${info.shift>1?'s':''})</span>`
+      : '';
+
+    html += `<div class="step-section">`;
+    html += `<div class="step-title">Step ${stepNum}: ${a} × ${info.bDigit}${shiftNote}</div>`;
+
+    if (info.bDigit === 0) {
+      html += `<div class="digit-steps"><div class="digit-step">Anything × 0 = 0</div></div>`;
+    } else {
+      html += `<div class="digit-steps">`;
+      info.digitSteps.forEach(s => {
+        if (s.isFinalCarry) {
+          html += `<div class="digit-step">  Final carry → write <strong>${s.write}</strong></div>`;
+          return;
+        }
+        let line = `${s.aDigit} × ${s.bDigit}`;
+        if (s.carry > 0) line += ` + <span class="carry-num">${s.carry}</span> (carry)`;
+        line += ` = ${s.prod}`;
+        if (s.newCarry > 0) {
+          line += `  →  write <strong>${s.write}</strong>, carry <span class="carry-num">${s.newCarry}</span>`;
+        } else {
+          line += `  →  write <strong>${s.write}</strong>`;
+        }
+        html += `<div class="digit-step">• ${line}</div>`;
+      });
+      html += '</div>';
+    }
+
+    const fullStr = String(info.fullVal);
+    html += `<div class="partial-result">`;
+    if (info.shift > 0) {
+      html += `${a} × ${info.bDigit} = ${info.partialVal}, `;
+      html += `then add ${'0'.repeat(info.shift)} → <strong>${fullStr}</strong>`;
+    } else {
+      html += `Result: <strong>${fullStr}</strong>`;
+    }
+    html += `</div></div>`;
+  });
+
+  // ── 3. Final addition explanation ──
+  if (bStr.length > 1) {
+    html += `<div class="step-section add-section">`;
+    html += `<div class="step-title">Final step: add all partial products</div>`;
+    html += `<div class="digit-steps">`;
+    partialInfos.forEach(info => {
+      html += `<div class="digit-step">${a} × ${info.bDigit}${'0'.repeat(info.shift)} = ${info.fullVal.toLocaleString()}</div>`;
+    });
+    html += `</div>`;
+    html += `<div class="partial-result" style="color:#27ae60;font-size:1.3em;">`;
+    html += partialInfos.map(i => i.fullVal.toLocaleString()).join(' + ');
+    html += ` = <strong>${total.toLocaleString()}</strong>`;
+    html += `</div></div>`;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+/* ───────── DIVISION ───────── */
+function renderDivision(total, divisor) {
+  const quotient = Math.floor(total / divisor);
+  const remainder = total % divisor;
+  document.getElementById('equation').textContent =
+    `${total} ÷ ${divisor} = ?` + (remainder ? `` : '');
+  document.getElementById('answerBox').textContent =
+    `= ${quotient}` + (remainder ? ` remainder ${remainder}` : '');
+
+  // Visual
+  const container = document.getElementById('groupsContainer');
+  container.innerHTML = '';
+  const showPiles = Math.min(quotient, 12);
+  document.getElementById('visualTitle').textContent =
+    `${total} 🍎 shared into groups of ${divisor} → ${quotient} group${quotient!==1?'s':''}` +
+    (remainder ? ` + ${remainder} left over` : '');
+
+  if (quotient <= 60 && divisor <= 20 && total <= 200) {
+    for (let g = 0; g < showPiles; g++) {
+      const div = document.createElement('div');
+      div.className = 'group';
+      for (let i = 0; i < divisor; i++) {
+        const s = document.createElement('span');
+        s.className = 'item'; s.textContent = '🍎';
+        div.appendChild(s);
+      }
+      container.appendChild(div);
+    }
+    if (quotient > showPiles) {
+      const more = document.createElement('div');
+      more.className = 'too-many';
+      more.textContent = `… and ${quotient - showPiles} more group${quotient-showPiles>1?'s':''}`;
+      container.appendChild(more);
+    }
+    if (remainder > 0) {
+      const rem = document.createElement('div');
+      rem.className = 'group';
+      rem.style.cssText = 'border-color:#f39c12;background:#fff8e1;';
+      for (let i = 0; i < remainder; i++) {
+        const s = document.createElement('span');
+        s.className = 'item'; s.textContent = '🍊';
+        rem.appendChild(s);
+      }
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:0.65em;color:#f39c12;width:100%;text-align:center;margin-top:2px;font-weight:bold';
+      lbl.textContent = 'leftover';
+      rem.appendChild(lbl);
+      container.appendChild(rem);
+    }
+  } else {
+    container.innerHTML = `<div class="too-many">Too many to show visually — see the workings below 🤓</div>`;
+  }
+
+  document.getElementById('workings').innerHTML = buildDivWorkings(total, divisor);
+}
+
+function buildDivWorkings(dividend, divisor) {
+  const dividendStr = String(dividend);
+  let current = 0;
+  let quotientStr = '';
+  const steps = [];
+
+  for (let i = 0; i < dividendStr.length; i++) {
+    current = current * 10 + parseInt(dividendStr[i]);
+    const q = Math.floor(current / divisor);
+    const rem = current % divisor;
+    quotientStr += String(q);
+    steps.push({ current, q, subtract: q * divisor, rem });
+    current = rem;
+  }
+
+  const cleanQ = parseInt(quotientStr);
+  const finalRem = steps[steps.length - 1].rem;
+  const dLen = dividendStr.length;
+  const sep = '─'.repeat(dLen + String(divisor).length + 5);
+
+  let lines = [];
+  const pad = n => String(n);
+
+  lines.push(`<span class="step">  ${divisor} ) ${dividendStr}</span>`);
+  lines.push(`<span class="line-sep">  ${sep}</span>`);
+
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    const indent = '       ' + ' '.repeat(i * 2);
+    if (s.current < divisor && s.q === 0 && i < steps.length - 1) {
+      lines.push(`<span class="step">${indent}${s.current}  (less than ${divisor}, write 0, bring down next digit)</span>`);
+    } else {
+      lines.push(`<span class="step">${indent}${s.current}  ÷  ${divisor}  =  ${s.q}   (since ${s.q} × ${divisor} = ${s.subtract})</span>`);
+      lines.push(`<span class="step">${indent}${s.current} − ${s.subtract} = ${s.rem}</span>`);
+    }
+  }
+
+  lines.push('');
+  lines.push(`<span class="line-sep">  ${sep}</span>`);
+  const remNote = finalRem > 0 ? `  remainder ${finalRem}` : '';
+  lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${remNote}</span>`);
+
+  return `<div class="div-workings">${lines.join('\n')}</div>`;
+}
+
+// Init
+update();
+</script>
+</body>
+</html>
