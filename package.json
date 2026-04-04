@@ -1,0 +1,24 @@
+{
+  "name": "gabriels-game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datajorgen-cloud/gabriels-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/datajorgen-cloud/gabriels-game/issues"
+  },
+  "homepage": "https://github.com/datajorgen-cloud/gabriels-game#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
