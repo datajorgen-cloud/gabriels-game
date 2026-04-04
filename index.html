@@ -152,7 +152,7 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   color: #888;
 }
 
-/* Answer reveal */
+/* Answer area */
 .answer-area {
   text-align: center;
   margin-top: 8px;
@@ -163,18 +163,67 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   color: #2c3e50;
   margin-bottom: 12px;
 }
-.reveal-btn {
+
+/* Answer input */
+.answer-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.answer-input {
+  font-size: 1.8em;
+  font-weight: bold;
+  width: 160px;
+  text-align: center;
+  border: 3px solid #bdc3c7;
+  border-radius: 14px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: #2c3e50;
+}
+.answer-input:focus { border-color: #3498db; box-shadow: 0 0 0 4px rgba(52,152,219,0.15); }
+.answer-input.correct { border-color: #27ae60; box-shadow: 0 0 0 4px rgba(39,174,96,0.2); }
+.answer-input.wrong { border-color: #e74c3c; box-shadow: 0 0 0 4px rgba(231,76,60,0.15); }
+
+.check-btn {
   background: #27ae60;
   color: white;
   border: none;
-  padding: 12px 36px;
+  padding: 12px 32px;
   font-size: 1.1em;
   border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.2s;
 }
-.reveal-btn:hover { background: #219150; transform: scale(1.04); }
+.check-btn:hover { background: #219150; transform: scale(1.04); }
+
+.feedback-msg {
+  font-size: 1.2em;
+  font-weight: bold;
+  min-height: 2em;
+  margin-bottom: 8px;
+  transition: all 0.3s;
+}
+.feedback-msg.success { color: #27ae60; }
+.feedback-msg.tryagain { color: #e67e22; }
+
+.reveal-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 8px 24px;
+  font-size: 0.9em;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+.reveal-btn:hover { background: #7f8c8d; opacity: 1; transform: scale(1.04); }
 .answer-box {
   display: none;
   margin-top: 14px;
@@ -188,6 +237,75 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   70%  { transform: scale(1.15); }
   100% { transform: scale(1); opacity: 1; }
 }
+
+/* Celebration overlay */
+.celebration-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+.celebration-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 4em;
+  font-weight: 900;
+  color: #27ae60;
+  text-shadow: 3px 3px 0 #fff, 0 0 20px rgba(39,174,96,0.4);
+  z-index: 10000;
+  pointer-events: none;
+  animation: celebPop 1.2s ease forwards;
+}
+@keyframes celebPop {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+  20%  { transform: translate(-50%, -50%) scale(1.4) rotate(3deg); opacity: 1; }
+  40%  { transform: translate(-50%, -50%) scale(0.95) rotate(-2deg); }
+  60%  { transform: translate(-50%, -50%) scale(1.1) rotate(1deg); }
+  80%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0; }
+}
+
+/* Confetti particle */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
+}
+
+/* Stars burst */
+.star-burst {
+  position: fixed;
+  font-size: 2em;
+  z-index: 10000;
+  pointer-events: none;
+  animation: starFloat 1.5s ease-out forwards;
+}
+@keyframes starFloat {
+  0%   { opacity: 1; transform: translate(0, 0) scale(0.5) rotate(0deg); }
+  50%  { opacity: 1; transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(180deg); }
+  100% { opacity: 0; transform: translate(var(--dx2), var(--dy2)) scale(0.3) rotate(360deg); }
+}
+
+/* Wrong answer shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-12px); }
+  40% { transform: translateX(12px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+.shake { animation: shake 0.4s ease; }
 
 /* Steps toggle */
 .steps-toggle {
@@ -349,7 +467,12 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
 
   <div class="answer-area">
     <div class="equation" id="equation"></div>
-    <button class="reveal-btn" onclick="revealAnswer()">Show Answer</button>
+    <div class="answer-input-row">
+      <input type="number" class="answer-input" id="answerInput" placeholder="?" onkeydown="if(event.key==='Enter')checkAnswer()">
+      <button class="check-btn" onclick="checkAnswer()">Check! ✓</button>
+    </div>
+    <div class="feedback-msg" id="feedbackMsg"></div>
+    <button class="reveal-btn" onclick="revealAnswer()">I give up — show me</button>
     <div class="answer-box" id="answerBox"></div>
   </div>
 </div>
@@ -420,9 +543,12 @@ function getVals() {
 
 function hideAnswer() {
   document.getElementById('answerBox').style.display = 'none';
+  if (document.getElementById('answerInput')) resetAnswerState();
 }
 function revealAnswer() {
+  answered = true;
   document.getElementById('answerBox').style.display = 'block';
+  document.getElementById('answerInput').readOnly = true;
 }
 function toggleSteps() {
   const area = document.getElementById('stepsArea');
@@ -670,7 +796,7 @@ function renderDivision(total, divisor) {
   const quotient = Math.floor(total / divisor);
   const remainder = total % divisor;
   document.getElementById('equation').textContent =
-    `${total} ÷ ${divisor} = ?` + (remainder ? `` : '');
+    `${total} ÷ ${divisor} = ?` + (remainder ? ' (just the quotient)' : '');
   document.getElementById('answerBox').textContent =
     `= ${quotient}` + (remainder ? ` remainder ${remainder}` : '');
 
@@ -764,6 +890,110 @@ function buildDivWorkings(dividend, divisor) {
   lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${remNote}</span>`);
 
   return `<div class="div-workings">${lines.join('\n')}</div>`;
+}
+
+/* ───────── ANSWER CHECKING & CELEBRATION ───────── */
+let answered = false;
+
+function getCorrectAnswer() {
+  const { a, b } = getVals();
+  if (mode === 'mult') return a * b;
+  return Math.floor(a / b);  // quotient for division
+}
+
+function checkAnswer() {
+  if (answered) return;
+  const input = document.getElementById('answerInput');
+  const feedback = document.getElementById('feedbackMsg');
+  const userAnswer = parseInt(input.value);
+  const correct = getCorrectAnswer();
+
+  if (isNaN(userAnswer)) {
+    input.focus();
+    return;
+  }
+
+  if (userAnswer === correct) {
+    answered = true;
+    input.classList.remove('wrong');
+    input.classList.add('correct');
+    input.readOnly = true;
+    feedback.className = 'feedback-msg success';
+    feedback.textContent = '';
+    launchCelebration();
+  } else {
+    input.classList.remove('correct');
+    input.classList.add('wrong');
+    input.classList.remove('shake');
+    void input.offsetWidth; // reflow to restart animation
+    input.classList.add('shake');
+    feedback.className = 'feedback-msg tryagain';
+    const encouragements = [
+      'Almost! Try again 💪',
+      'Not quite — give it another shot!',
+      'So close! Try once more 🤔',
+      'Hmm, not that one — keep going!',
+      'Try again, you got this! 🌟',
+    ];
+    feedback.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
+  }
+}
+
+function launchCelebration() {
+  // Confetti burst
+  const colors = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#ff6b81'];
+  for (let i = 0; i < 80; i++) {
+    const conf = document.createElement('div');
+    conf.className = 'confetti';
+    conf.style.left = Math.random() * 100 + 'vw';
+    conf.style.top = -10 - Math.random() * 20 + 'px';
+    conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+    conf.style.width = (6 + Math.random() * 10) + 'px';
+    conf.style.height = (6 + Math.random() * 10) + 'px';
+    conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    conf.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    conf.style.animationDelay = Math.random() * 0.6 + 's';
+    document.body.appendChild(conf);
+    setTimeout(() => conf.remove(), 4000);
+  }
+
+  // Big "CORRECT!" text
+  const text = document.createElement('div');
+  text.className = 'celebration-text';
+  text.textContent = '⭐ CORRECT! ⭐';
+  document.body.appendChild(text);
+  setTimeout(() => text.remove(), 1500);
+
+  // Star burst from center
+  const stars = ['⭐','🌟','✨','💫','🎉','🎊','🏆','💥'];
+  for (let i = 0; i < 14; i++) {
+    const star = document.createElement('div');
+    star.className = 'star-burst';
+    const angle = (i / 14) * Math.PI * 2;
+    const dist = 80 + Math.random() * 120;
+    const dist2 = dist + 40 + Math.random() * 80;
+    star.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    star.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+    star.style.setProperty('--dx2', Math.cos(angle) * dist2 + 'px');
+    star.style.setProperty('--dy2', Math.sin(angle) * dist2 - 60 + 'px');
+    star.style.left = '50%';
+    star.style.top = '50%';
+    star.textContent = stars[Math.floor(Math.random() * stars.length)];
+    star.style.animationDelay = Math.random() * 0.3 + 's';
+    document.body.appendChild(star);
+    setTimeout(() => star.remove(), 2000);
+  }
+}
+
+function resetAnswerState() {
+  answered = false;
+  const input = document.getElementById('answerInput');
+  const feedback = document.getElementById('feedbackMsg');
+  input.value = '';
+  input.readOnly = false;
+  input.classList.remove('correct', 'wrong', 'shake');
+  feedback.textContent = '';
+  feedback.className = 'feedback-msg';
 }
 
 // Init
