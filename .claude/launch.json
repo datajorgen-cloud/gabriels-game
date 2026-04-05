@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Static File Server",
+      "runtimeExecutable": "/opt/homebrew/bin/node",
+      "runtimeArgs": ["-e", "const h=require('http'),f=require('fs'),p=require('path');h.createServer((q,r)=>{let u=q.url==='/'?'/index.html':q.url;let fp=p.join(process.cwd(),u);f.readFile(fp,(e,d)=>{if(e){r.writeHead(404);r.end('Not found');}else{const ext=p.extname(fp);const ct={'html':'text/html','css':'text/css','js':'application/javascript'}[ext.slice(1)]||'application/octet-stream';r.writeHead(200,{'Content-Type':ct});r.end(d);}});}).listen(3000,()=>console.log('Serving on 3000'));"],
+      "port": 3000
+    }
+  ]
+}
