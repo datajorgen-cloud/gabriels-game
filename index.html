@@ -138,31 +138,88 @@ h1 {
   padding: 10px;
 }
 
-/* Area model */
-.area-model {
+/* Break-apart visualization */
+.break-apart {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
-  padding: 10px;
+  padding: 4px 0;
+  width: 100%;
 }
-.area-rect {
-  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+.break-part {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.break-label {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #555;
+}
+.break-bar {
+  height: 28px;
   border-radius: 8px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: 0 10px;
   font-weight: bold;
-  font-size: 1em;
-  color: #7b2d42;
-  border: 2px solid #e0607a;
+  font-size: 0.85em;
+  color: white;
+  min-width: 36px;
 }
-.area-labels {
+.break-input-row {
   display: flex;
-  gap: 20px;
-  font-size: 0.9em;
-  color: #888;
+  align-items: center;
+  gap: 8px;
 }
+.break-input {
+  width: 80px;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #bdc3c7;
+  border-radius: 10px;
+  padding: 5px 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: #2c3e50;
+}
+.break-input:focus { border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
+.break-input.correct { border-color: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.2); background: #eafaf1; }
+.break-input.wrong { border-color: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.15); }
+.break-check-btn {
+  background: #7f8c8d;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  font-size: 0.85em;
+  border-radius: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.break-check-btn:hover { background: #6c7a7d; transform: scale(1.04); }
+.break-result {
+  font-weight: bold;
+  font-size: 0.95em;
+  color: #888;
+  display: none;
+}
+.break-result.visible { display: inline; }
+.break-total {
+  border-top: 2px dashed #ccc;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+.break-total .break-label { color: #27ae60; font-size: 1em; }
+
+/* Apple grid for medium numbers */
+.apple-grid {
+  display: grid;
+  gap: 1px;
+  justify-content: start;
+}
+.apple-grid .item { font-size: 0.95em; line-height: 1; text-align: center; }
 
 /* Answer area */
 .answer-area {
@@ -952,7 +1009,8 @@ function renderVisualMult(a, b, total) {
   const container = document.getElementById('groupsContainer');
   container.innerHTML = '';
 
-  if (total <= 80 && a <= 20 && b <= 20) {
+  if (total <= 50 && a <= 10 && b <= 10) {
+    // Small numbers: show apple groups
     document.getElementById('visualTitle').textContent =
       `${a} group${a>1?'s':''} of ${b} 🍎`;
     for (let g = 0; g < a; g++) {
@@ -965,24 +1023,126 @@ function renderVisualMult(a, b, total) {
       }
       container.appendChild(div);
     }
-  } else {
+  } else if (total <= 144 && a <= 12 && b <= 12) {
+    // Medium numbers: show a neat grid of apples (rows × columns)
     document.getElementById('visualTitle').textContent =
-      `Area model: ${a} × ${b} = ${total.toLocaleString()}`;
-    const maxW = 340, maxH = 140;
-    const scale = Math.min(maxW / a, maxH / b, 2);
-    const w = Math.max(Math.round(a * scale), 60);
-    const h = Math.max(Math.round(b * scale), 40);
-    container.innerHTML = `
-      <div class="area-model">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.9em;color:#888;">${b}</div>
-          <div class="area-rect" style="width:${w}px;height:${h}px;">
-            ${a} × ${b}<br><span style="font-size:0.85em;opacity:0.8">= ${total.toLocaleString()}</span>
-          </div>
+      `${a} rows × ${b} columns = ? 🍎`;
+    const grid = document.createElement('div');
+    grid.className = 'apple-grid';
+    grid.style.gridTemplateColumns = `repeat(${b}, 1fr)`;
+    for (let i = 0; i < a * b; i++) {
+      const s = document.createElement('span');
+      s.className = 'item'; s.textContent = '🍎';
+      grid.appendChild(s);
+    }
+    container.appendChild(grid);
+  } else {
+    // Large numbers: break-apart strategy
+    // Break the bigger number into easy parts
+    // e.g. 24 × 13 → 24×10 + 24×3
+    // Bars are proportional to the total, so parts visually add up
+    // Don't show the total — the child has to figure that out!
+    const parts = breakApart(a, b);
+    const barColors = ['#e74c3c', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
+
+    document.getElementById('visualTitle').textContent =
+      `Break it apart: ${a} × ${b}`;
+
+    let html = '<div class="break-apart">';
+    parts.forEach((p, i) => {
+      const color = barColors[i % barColors.length];
+      html += `<div class="break-part">
+        <span class="break-label">${a} × ${p.factor} = </span>
+        <div class="break-input-row">
+          <input type="number" class="break-input" id="subInput${i}" data-answer="${p.value}" data-index="${i}" data-color="${color}" placeholder="?" onkeydown="if(event.key==='Enter')checkSubProblem(${i})">
+          <button class="break-check-btn" onclick="checkSubProblem(${i})">Check</button>
+          <span class="break-result" id="subResult${i}"></span>
         </div>
-        <div style="font-size:0.9em;color:#888;margin-left:22px;">${a}</div>
+        <div class="break-bar" id="subBar${i}" style="width:0%;background:${color};display:none;"></div>
       </div>`;
+    });
+    // Hint row: updates as sub-problems are solved
+    html += `<div class="break-total" id="breakTotal">
+      <span class="break-label" id="breakTotalLabel">Solve the parts above, then answer below!</span>
+    </div>`;
+    html += '</div>';
+    container.innerHTML = html;
   }
+}
+
+function checkSubProblem(index) {
+  const input = document.getElementById('subInput' + index);
+  const result = document.getElementById('subResult' + index);
+  const bar = document.getElementById('subBar' + index);
+  const correctVal = parseInt(input.dataset.answer);
+  const userVal = parseInt(input.value);
+  const color = input.dataset.color;
+
+  if (isNaN(userVal)) { input.focus(); return; }
+
+  if (userVal === correctVal) {
+    input.classList.remove('wrong');
+    input.classList.add('correct');
+    input.readOnly = true;
+    result.textContent = correctVal;
+    result.classList.add('visible');
+    result.style.color = '#27ae60';
+
+    // Show the bar with correct proportional width
+    const total = currentA * currentB;
+    const widthPct = Math.max((correctVal / total) * 100, 5);
+    bar.style.display = 'flex';
+    bar.style.width = widthPct + '%';
+    bar.textContent = correctVal;
+
+    // Update the total hint if all sub-problems are solved
+    updateBreakTotal();
+  } else {
+    input.classList.remove('correct');
+    input.classList.add('wrong');
+    input.classList.remove('shake');
+    void input.offsetWidth;
+    input.classList.add('shake');
+    input.value = '';
+    result.textContent = 'Try again!';
+    result.classList.add('visible');
+    result.style.color = '#e74c3c';
+    input.focus();
+  }
+}
+
+function updateBreakTotal() {
+  const allInputs = document.querySelectorAll('.break-input');
+  const solved = [];
+  let allDone = true;
+  allInputs.forEach(inp => {
+    if (inp.classList.contains('correct')) {
+      solved.push(parseInt(inp.dataset.answer));
+    } else {
+      allDone = false;
+    }
+  });
+
+  const label = document.getElementById('breakTotalLabel');
+  if (allDone && solved.length > 0) {
+    const sumExpr = solved.join(' + ');
+    label.textContent = sumExpr + ' = ?';
+  } else if (solved.length > 0) {
+    label.textContent = 'Keep going — solve the remaining parts!';
+  }
+}
+
+function breakApart(a, b) {
+  // Break b into place-value parts: 13 → [10, 3], 245 → [200, 40, 5]
+  const bStr = String(b);
+  const parts = [];
+  for (let i = 0; i < bStr.length; i++) {
+    const digit = parseInt(bStr[i]);
+    if (digit === 0) continue;
+    const placeValue = digit * Math.pow(10, bStr.length - 1 - i);
+    parts.push({ factor: placeValue, value: a * placeValue });
+  }
+  return parts;
 }
 
 /* ───────── LONG MULTIPLICATION WORKINGS ───────── */
