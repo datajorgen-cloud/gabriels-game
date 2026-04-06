@@ -1328,6 +1328,24 @@ function renderDivision(total, divisor) {
 }
 
 function buildDivWorkings(dividend, divisor) {
+  const quotient = Math.floor(dividend / divisor);
+  const remainder = dividend % divisor;
+  const remNote = remainder > 0 ? ` remainder ${remainder}` : '';
+
+  // Simple case: single-step division (dividend < 100 or only one meaningful step)
+  if (String(dividend).length <= String(divisor).length + 1 && dividend < 100) {
+    let html = '<div class="div-workings">';
+    html += `<span class="step">  ${dividend} ÷ ${divisor} = ${quotient}`;
+    html += `   (because ${quotient} × ${divisor} = ${quotient * divisor})</span>\n`;
+    if (remainder > 0) {
+      html += `<span class="step">  ${dividend} − ${quotient * divisor} = ${remainder} left over</span>\n`;
+    }
+    html += `\n<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${quotient}</strong>${remNote}</span>`;
+    html += '</div>';
+    return html;
+  }
+
+  // Full long division for larger numbers
   const dividendStr = String(dividend);
   let current = 0;
   let quotientStr = '';
@@ -1359,8 +1377,8 @@ function buildDivWorkings(dividend, divisor) {
   }
   lines.push('');
   lines.push(`<span class="line-sep">  ${sep}</span>`);
-  const remNote = finalRem > 0 ? `  remainder ${finalRem}` : '';
-  lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${remNote}</span>`);
+  const finalRemNote = finalRem > 0 ? `  remainder ${finalRem}` : '';
+  lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${finalRemNote}</span>`);
   return `<div class="div-workings">${lines.join('\n')}</div>`;
 }
 
