@@ -19,25 +19,76 @@ h1 {
   margin-bottom: 10px;
   text-shadow: 2px 2px 0 #fff;
 }
+
+/* Score bar */
+.score-bar {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.score-item {
+  background: white;
+  border-radius: 16px;
+  padding: 8px 20px;
+  font-size: 1.1em;
+  font-weight: bold;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.score-item .label { color: #888; font-weight: 600; }
+.score-item .value { color: #2c3e50; font-size: 1.3em; }
+.score-item .value.points { color: #e74c3c; }
+.score-item .value.streak { color: #f39c12; }
+.score-item .value.level { color: #3498db; }
+
+/* Streak fire animation */
+.streak-fire { display: none; }
+.streak-fire.active { display: inline; animation: fireFlicker 0.4s ease infinite alternate; }
+@keyframes fireFlicker {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2) rotate(5deg); }
+}
+
+/* Wrong indicators */
+.wrong-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.wrong-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #e74c3c;
+  background: transparent;
+  transition: background 0.3s;
+}
+.wrong-dot.filled { background: #e74c3c; }
+
 .mode-buttons {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   margin-bottom: 24px;
 }
 .mode-btn {
-  padding: 12px 32px;
-  font-size: 1.1em;
+  padding: 8px 20px;
+  font-size: 0.95em;
   border: none;
-  border-radius: 30px;
+  border-radius: 20px;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.2s;
 }
+.mode-btn.both { background: #8e44ad; color: white; }
 .mode-btn.mult { background: #e74c3c; color: white; }
 .mode-btn.div  { background: #3498db; color: white; }
-.mode-btn.active { transform: scale(1.1); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
-.mode-btn:not(.active) { opacity: 0.55; }
+.mode-btn.active { transform: scale(1.08); box-shadow: 0 3px 12px rgba(0,0,0,0.2); }
+.mode-btn:not(.active) { opacity: 0.45; }
 
 .card {
   background: white;
@@ -47,45 +98,6 @@ h1 {
   margin: 0 auto 24px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
 }
-
-/* Slider rows */
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.slider-label {
-  font-size: 1em;
-  font-weight: bold;
-  color: #555;
-  width: 90px;
-  flex-shrink: 0;
-}
-input[type=range] {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  accent-color: #e74c3c;
-  min-width: 0;
-}
-input[type=number].num-input {
-  width: 80px;
-  flex-shrink: 0;
-  font-size: 1.3em;
-  font-weight: bold;
-  color: #c0392b;
-  border: 2px solid #e74c3c;
-  border-radius: 8px;
-  padding: 4px 8px;
-  text-align: center;
-  outline: none;
-  -moz-appearance: textfield;
-}
-input[type=number].num-input::-webkit-inner-spin-button,
-input[type=number].num-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(231,76,60,0.15); }
 
 /* Visual area */
 .visual-area {
@@ -126,31 +138,88 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   padding: 10px;
 }
 
-/* Area model (rectangle) for large numbers */
-.area-model {
+/* Break-apart visualization */
+.break-apart {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
-  padding: 10px;
+  padding: 4px 0;
+  width: 100%;
 }
-.area-rect {
-  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+.break-part {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.break-label {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #555;
+}
+.break-bar {
+  height: 28px;
   border-radius: 8px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: 0 10px;
   font-weight: bold;
-  font-size: 1em;
-  color: #7b2d42;
-  border: 2px solid #e0607a;
+  font-size: 0.85em;
+  color: white;
+  min-width: 36px;
 }
-.area-labels {
+.break-input-row {
   display: flex;
-  gap: 20px;
-  font-size: 0.9em;
-  color: #888;
+  align-items: center;
+  gap: 8px;
 }
+.break-input {
+  width: 80px;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #bdc3c7;
+  border-radius: 10px;
+  padding: 5px 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: #2c3e50;
+}
+.break-input:focus { border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
+.break-input.correct { border-color: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.2); background: #eafaf1; }
+.break-input.wrong { border-color: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.15); }
+.break-check-btn {
+  background: #7f8c8d;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  font-size: 0.85em;
+  border-radius: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.break-check-btn:hover { background: #6c7a7d; transform: scale(1.04); }
+.break-result {
+  font-weight: bold;
+  font-size: 0.95em;
+  color: #888;
+  display: none;
+}
+.break-result.visible { display: inline; }
+.break-total {
+  border-top: 2px dashed #ccc;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+.break-total .break-label { color: #27ae60; font-size: 1em; }
+
+/* Apple grid for medium numbers */
+.apple-grid {
+  display: grid;
+  gap: 1px;
+  justify-content: start;
+}
+.apple-grid .item { font-size: 0.95em; line-height: 1; text-align: center; }
 
 /* Answer area */
 .answer-area {
@@ -222,8 +291,27 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   font-weight: bold;
   transition: all 0.2s;
   opacity: 0.7;
+  display: none;
 }
+.reveal-btn.visible { display: inline-block; }
 .reveal-btn:hover { background: #7f8c8d; opacity: 1; transform: scale(1.04); }
+
+.next-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 36px;
+  font-size: 1.1em;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+  display: none;
+  margin-top: 12px;
+}
+.next-btn.visible { display: inline-block; }
+.next-btn:hover { background: #2980b9; transform: scale(1.04); }
+
 .answer-box {
   display: none;
   margin-top: 14px;
@@ -236,6 +324,43 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   0%   { transform: scale(0.5); opacity: 0; }
   70%  { transform: scale(1.15); }
   100% { transform: scale(1); opacity: 1; }
+}
+
+/* Bonus popup */
+.bonus-popup {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 2.5em;
+  font-weight: 900;
+  color: #f39c12;
+  text-shadow: 3px 3px 0 #fff, 0 0 20px rgba(243,156,18,0.4);
+  z-index: 10001;
+  pointer-events: none;
+  animation: bonusPop 2s ease forwards;
+}
+@keyframes bonusPop {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  15%  { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  30%  { transform: translate(-50%, -50%) scale(1); }
+  70%  { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) translateY(-40px); opacity: 0; }
+}
+
+/* Points fly animation */
+.points-fly {
+  position: fixed;
+  font-size: 1.8em;
+  font-weight: 900;
+  color: #27ae60;
+  z-index: 10000;
+  pointer-events: none;
+  animation: pointsFly 1.2s ease-out forwards;
+}
+@keyframes pointsFly {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-80px) scale(0.5); }
 }
 
 /* Celebration overlay */
@@ -323,13 +448,8 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
 .steps-area { display: none; }
 .steps-area.visible { display: block; }
 
-/* ── Long multiplication workings ── */
-.mult-workings {
-  font-family: 'Courier New', monospace;
-  font-size: 1.05em;
-}
-
 /* Column layout table */
+.mult-workings { font-family: 'Courier New', monospace; font-size: 1.05em; }
 .col-table {
   border-collapse: collapse;
   margin: 0 auto 20px;
@@ -337,128 +457,239 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   font-size: 1.25em;
 }
 .col-table td {
-  width: 32px;
-  height: 32px;
-  text-align: center;
-  vertical-align: middle;
-  padding: 0;
+  width: 32px; height: 32px;
+  text-align: center; vertical-align: middle; padding: 0;
 }
 .col-table td.op-cell {
-  width: 36px;
-  color: #888;
-  font-weight: bold;
-  text-align: right;
-  padding-right: 6px;
+  width: 36px; color: #888; font-weight: bold;
+  text-align: right; padding-right: 6px;
 }
-.col-table .carry-row td {
-  height: 20px;
-  font-size: 0.65em;
-  color: #e67e22;
-  font-weight: bold;
-  vertical-align: bottom;
-}
-.col-table .sep-row td {
-  border-top: 3px solid #555;
-  height: 6px;
-}
+.col-table .carry-row td { height: 20px; font-size: 0.65em; color: #e67e22; font-weight: bold; vertical-align: bottom; }
+.col-table .sep-row td { border-top: 3px solid #555; height: 6px; }
 .col-table .sep-row td.op-cell { border-top: none; }
-.col-table .result-row td {
-  color: #27ae60;
-  font-weight: bold;
-}
-.col-table .partial-row td {
-  color: #2980b9;
-}
+.col-table .result-row td { color: #27ae60; font-weight: bold; }
+.col-table .partial-row td { color: #2980b9; }
 .col-table td.dim { color: #ccc; }
 
-/* Step-by-step explanation blocks */
 .step-section {
-  background: #f8f8ff;
-  border-left: 4px solid #e74c3c;
-  border-radius: 0 10px 10px 0;
-  padding: 14px 18px;
-  margin-bottom: 14px;
+  background: #f8f8ff; border-left: 4px solid #e74c3c;
+  border-radius: 0 10px 10px 0; padding: 14px 18px; margin-bottom: 14px;
 }
-.step-section.add-section {
-  border-left-color: #27ae60;
-}
-.step-title {
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 1.05em;
-}
-.digit-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
-  padding-left: 10px;
-}
-.digit-step {
-  color: #555;
-  font-family: 'Courier New', monospace;
-  font-size: 0.98em;
-}
-.carry-num {
-  background: #e67e22;
-  color: white;
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-size: 0.85em;
-  font-weight: bold;
-  margin: 0 2px;
-}
-.partial-result {
-  font-size: 1.1em;
-  font-weight: bold;
-  color: #2980b9;
-  margin-top: 6px;
-  padding-left: 10px;
-}
-.place-note {
-  color: #999;
-  font-weight: normal;
-  font-size: 0.88em;
-}
+.step-section.add-section { border-left-color: #27ae60; }
+.step-title { font-weight: bold; color: #333; margin-bottom: 10px; font-size: 1.05em; }
+.digit-steps { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; padding-left: 10px; }
+.digit-step { color: #555; font-family: 'Courier New', monospace; font-size: 0.98em; }
+.carry-num { background: #e67e22; color: white; border-radius: 4px; padding: 1px 5px; font-size: 0.85em; font-weight: bold; margin: 0 2px; }
+.partial-result { font-size: 1.1em; font-weight: bold; color: #2980b9; margin-top: 6px; padding-left: 10px; }
+.place-note { color: #999; font-weight: normal; font-size: 0.88em; }
 
 /* Long division workings */
 .div-workings {
-  font-family: 'Courier New', monospace;
-  font-size: 1.05em;
-  background: #f8f8ff;
-  border-radius: 14px;
-  padding: 20px 24px;
-  border: 2px solid #d0d0ff;
-  white-space: pre;
-  line-height: 2;
-  overflow-x: auto;
+  font-family: 'Courier New', monospace; font-size: 1.05em;
+  background: #f8f8ff; border-radius: 14px; padding: 20px 24px;
+  border: 2px solid #d0d0ff; white-space: pre; line-height: 2; overflow-x: auto;
 }
 .div-workings .step { color: #555; }
 .div-workings .result-line { color: #27ae60; font-weight: bold; }
 .div-workings .line-sep { color: #bbb; }
+
+/* Difficulty badge */
+.difficulty-badge {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  color: #888;
+}
+
+/* Start screen overlay */
+.start-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.start-screen.hidden { display: none; }
+.start-card {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 36px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+  text-align: center;
+}
+.start-card h2 {
+  font-size: 1.8em;
+  color: #c0392b;
+  margin-bottom: 8px;
+}
+.start-card .start-subtitle {
+  color: #888;
+  font-size: 1em;
+  margin-bottom: 24px;
+}
+.level-picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.level-pick-btn {
+  border: 3px solid #ddd;
+  background: #fafafa;
+  border-radius: 14px;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.level-pick-btn:hover { border-color: #bbb; background: #f0f0f0; }
+.level-pick-btn.selected {
+  border-color: #3498db;
+  background: #ebf5fb;
+  transform: scale(1.05);
+  box-shadow: 0 3px 12px rgba(52,152,219,0.25);
+}
+.level-pick-btn .lvl-num {
+  font-size: 1.6em;
+  font-weight: 900;
+  color: #2c3e50;
+  display: block;
+}
+.level-pick-btn .lvl-label {
+  font-size: 0.75em;
+  font-weight: bold;
+  color: #888;
+  display: block;
+  margin-top: 2px;
+}
+.level-pick-btn .lvl-range {
+  font-size: 0.65em;
+  color: #aaa;
+  display: block;
+  margin-top: 2px;
+}
+.start-game-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 16px 48px;
+  font-size: 1.3em;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.start-game-btn:hover { background: #219150; transform: scale(1.05); }
+
+/* Best streak footer */
+.best-streak-bar {
+  text-align: center;
+  margin: 0 auto;
+  max-width: 820px;
+  padding: 14px 20px;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #f39c12;
+  background: rgba(255,255,255,0.6);
+  border-radius: 16px;
+}
+.best-streak-bar span {
+  font-size: 1.3em;
+  color: #e67e22;
+}
 </style>
 </head>
 <body>
 
+<div class="start-screen" id="startScreen">
+  <div class="start-card">
+    <h2>🍎 Gabriel's Math Game</h2>
+    <div class="start-subtitle">Choose your starting level</div>
+    <div class="level-picker">
+      <button class="level-pick-btn selected" onclick="pickLevel(1, this)">
+        <span class="lvl-num">1</span>
+        <span class="lvl-label">Easy</span>
+        <span class="lvl-range">1–5 × 1–5</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(2, this)">
+        <span class="lvl-num">2</span>
+        <span class="lvl-label">Easy</span>
+        <span class="lvl-range">2–7 × 2–7</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(3, this)">
+        <span class="lvl-num">3</span>
+        <span class="lvl-label">Medium</span>
+        <span class="lvl-range">2–9 × 2–9</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(4, this)">
+        <span class="lvl-num">4</span>
+        <span class="lvl-label">Medium</span>
+        <span class="lvl-range">2–12 × 2–12</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(5, this)">
+        <span class="lvl-num">5</span>
+        <span class="lvl-label">Hard</span>
+        <span class="lvl-range">5–15 × 2–12</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(6, this)">
+        <span class="lvl-num">6</span>
+        <span class="lvl-label">Hard</span>
+        <span class="lvl-range">10–25 × 2–15</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(7, this)">
+        <span class="lvl-num">7</span>
+        <span class="lvl-label">Expert</span>
+        <span class="lvl-range">10–50 × 2–20</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(8, this)">
+        <span class="lvl-num">8</span>
+        <span class="lvl-label">Expert</span>
+        <span class="lvl-range">10–99 × 2–50</span>
+      </button>
+    </div>
+    <button class="start-game-btn" onclick="startGame()">Start Game! 🚀</button>
+  </div>
+</div>
+
 <h1>🍎 Gabriel's Math Game</h1>
 
+<div class="score-bar">
+  <div class="score-item">
+    <span class="label">Score</span>
+    <span class="value points" id="scoreDisplay">0</span>
+  </div>
+  <div class="score-item">
+    <span class="label">Streak</span>
+    <span class="value streak" id="streakDisplay">0</span>
+    <span class="streak-fire" id="streakFire">🔥</span>
+  </div>
+  <div class="score-item">
+    <span class="label">Level</span>
+    <span class="value level" id="levelDisplay">1</span>
+  </div>
+  <div class="score-item">
+    <span class="label">Tries left</span>
+    <div class="wrong-dots" id="wrongDots">
+      <div class="wrong-dot" id="dot0"></div>
+      <div class="wrong-dot" id="dot1"></div>
+      <div class="wrong-dot" id="dot2"></div>
+    </div>
+  </div>
+</div>
+
 <div class="mode-buttons">
-  <button class="mode-btn mult active" onclick="setMode('mult')">✖ Multiplication</button>
-  <button class="mode-btn div"  onclick="setMode('div')">➗ Division</button>
+  <button class="mode-btn both active" onclick="setMode('both')">Both</button>
+  <button class="mode-btn mult" onclick="setMode('mult')">✖ Only</button>
+  <button class="mode-btn div"  onclick="setMode('div')">➗ Only</button>
 </div>
 
 <div class="card">
-  <div class="slider-row">
-    <span class="slider-label" id="labelA">First number</span>
-    <input type="range" id="sliderA" min="1" max="9999" value="24" oninput="syncFromSlider('A')">
-    <input type="number" id="inputA" class="num-input" min="1" max="9999" value="24" oninput="syncFromInput('A')">
-  </div>
-  <div class="slider-row">
-    <span class="slider-label" id="labelB">Second number</span>
-    <input type="range" id="sliderB" min="1" max="999" value="13" oninput="syncFromSlider('B')">
-    <input type="number" id="inputB" class="num-input" min="1" max="999" value="13" oninput="syncFromInput('B')">
-  </div>
+  <div class="difficulty-badge" id="difficultyBadge"></div>
 
   <div class="visual-area" id="visualArea">
     <div class="visual-title" id="visualTitle"></div>
@@ -469,11 +700,12 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
     <div class="equation" id="equation"></div>
     <div class="answer-input-row">
       <input type="number" class="answer-input" id="answerInput" placeholder="?" onkeydown="if(event.key==='Enter')checkAnswer()">
-      <button class="check-btn" onclick="checkAnswer()">Check! ✓</button>
+      <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check! ✓</button>
     </div>
     <div class="feedback-msg" id="feedbackMsg"></div>
-    <button class="reveal-btn" onclick="revealAnswer()">I give up — show me</button>
+    <button class="reveal-btn" id="revealBtn" onclick="revealAnswer()">Show me the answer</button>
     <div class="answer-box" id="answerBox"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question ➜</button>
   </div>
 </div>
 
@@ -487,80 +719,281 @@ input[type=number].num-input:focus { border-color: #c0392b; box-shadow: 0 0 0 3p
   </div>
 </div>
 
-<script>
-let mode = 'mult';
+<div class="best-streak-bar">
+  🏆 Best streak: <span id="bestStreakValue">0</span> in a row
+</div>
 
+<script>
+/* ───────── GAME STATE ───────── */
+let mode = 'both';        // 'both', 'mult', or 'div'
+let questionMode = 'mult'; // actual mode for the current question
+let score = 0;
+let streak = 0;
+let level = 1;
+let wrongCount = 0;       // wrong attempts on current question
+let answered = false;
+let questionsAnswered = 0; // total questions answered correctly (for leveling)
+let bestStreak = 0;
+let startingLevel = 1;
+let currentA = 0;
+let currentB = 0;
+
+/* ───────── DIFFICULTY / QUESTION GENERATION ───────── */
+// Level determines the number ranges
+// Level 1: 1-5 × 1-5       (or divide results up to 25)
+// Level 2: 2-7 × 2-7
+// Level 3: 2-9 × 2-9
+// Level 4: 2-12 × 2-12
+// Level 5: 5-15 × 2-12
+// Level 6: 10-25 × 2-15
+// Level 7: 10-50 × 2-20
+// Level 8+: 10-99 × 2-50
+
+function getLevelConfig(lvl) {
+  const configs = [
+    { minA: 1, maxA: 5,  minB: 1, maxB: 5,  label: 'Easy' },        // Level 1
+    { minA: 2, maxA: 7,  minB: 2, maxB: 7,  label: 'Easy' },        // Level 2
+    { minA: 2, maxA: 9,  minB: 2, maxB: 9,  label: 'Medium' },      // Level 3
+    { minA: 2, maxA: 12, minB: 2, maxB: 12, label: 'Medium' },      // Level 4
+    { minA: 5, maxA: 15, minB: 2, maxB: 12, label: 'Hard' },        // Level 5
+    { minA: 10, maxA: 25, minB: 2, maxB: 15, label: 'Hard' },       // Level 6
+    { minA: 10, maxA: 50, minB: 2, maxB: 20, label: 'Expert' },     // Level 7
+    { minA: 10, maxA: 99, minB: 2, maxB: 50, label: 'Expert' },     // Level 8+
+  ];
+  return configs[Math.min(lvl - 1, configs.length - 1)];
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateQuestion() {
+  const cfg = getLevelConfig(level);
+
+  // Pick the actual operation for this question
+  if (mode === 'both') {
+    questionMode = Math.random() > 0.5 ? 'mult' : 'div';
+  } else {
+    questionMode = mode;
+  }
+
+  if (questionMode === 'mult') {
+    currentA = randInt(cfg.minA, cfg.maxA);
+    currentB = randInt(cfg.minB, cfg.maxB);
+    // Randomly swap so it's not always big × small
+    if (Math.random() > 0.5) { const t = currentA; currentA = currentB; currentB = t; }
+  } else {
+    // For division: generate a × b, then ask (a*b) ÷ b = a (so it divides evenly)
+    const a = randInt(cfg.minA, cfg.maxA);
+    const b = randInt(cfg.minB, cfg.maxB);
+    currentA = a * b;  // dividend
+    currentB = b;      // divisor
+  }
+
+  wrongCount = 0;
+  answered = false;
+  updateWrongDots();
+  resetAnswerState();
+  document.getElementById('revealBtn').classList.remove('visible');
+  document.getElementById('nextBtn').classList.remove('visible');
+  document.getElementById('difficultyBadge').textContent =
+    `Level ${level} — ${getLevelConfig(level).label}`;
+  renderQuestion();
+  document.getElementById('answerInput').focus();
+}
+
+function renderQuestion() {
+  if (questionMode === 'mult') renderMultiplication(currentA, currentB);
+  else renderDivision(currentA, currentB);
+  if (document.getElementById('stepsToggle').checked)
+    document.getElementById('stepsArea').classList.add('visible');
+}
+
+/* ───────── SCORING ───────── */
+function addPoints(pts) {
+  score += pts;
+  document.getElementById('scoreDisplay').textContent = score;
+
+  // Fly +N animation
+  const fly = document.createElement('div');
+  fly.className = 'points-fly';
+  fly.textContent = '+' + pts;
+  fly.style.left = '50%';
+  fly.style.top = '45%';
+  document.body.appendChild(fly);
+  setTimeout(() => fly.remove(), 1300);
+}
+
+function updateStreak() {
+  if (streak > bestStreak) {
+    bestStreak = streak;
+    document.getElementById('bestStreakValue').textContent = bestStreak;
+  }
+  document.getElementById('streakDisplay').textContent = streak;
+  const fire = document.getElementById('streakFire');
+  fire.classList.toggle('active', streak >= 3);
+}
+
+function updateLevel() {
+  document.getElementById('levelDisplay').textContent = level;
+}
+
+function updateWrongDots() {
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('dot' + i).classList.toggle('filled', i < wrongCount);
+  }
+}
+
+function calculateLevel() {
+  // Level up every 5 correct answers, but never below starting level
+  const newLevel = Math.min(Math.max(Math.floor(questionsAnswered / 5) + startingLevel, startingLevel), 8);
+  if (newLevel !== level) {
+    level = newLevel;
+    updateLevel();
+  }
+}
+
+/* ───────── START SCREEN ───────── */
+function pickLevel(lvl, btn) {
+  startingLevel = lvl;
+  document.querySelectorAll('.level-pick-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function startGame() {
+  level = startingLevel;
+  updateLevel();
+  document.getElementById('startScreen').classList.add('hidden');
+  generateQuestion();
+}
+
+/* ───────── MODE SWITCHING ───────── */
 function setMode(m) {
   mode = m;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.mode-btn.' + (m === 'mult' ? 'mult' : 'div')).classList.add('active');
+  document.querySelector('.mode-btn.' + m).classList.add('active');
+  generateQuestion();
+}
 
-  const sliderA = document.getElementById('sliderA');
-  const sliderB = document.getElementById('sliderB');
-  const inputA  = document.getElementById('inputA');
-  const inputB  = document.getElementById('inputB');
+/* ───────── ANSWER CHECKING ───────── */
+function getCorrectAnswer() {
+  if (questionMode === 'mult') return currentA * currentB;
+  return Math.floor(currentA / currentB);
+}
 
-  if (m === 'mult') {
-    document.getElementById('labelA').textContent = 'First number';
-    document.getElementById('labelB').textContent = 'Second number';
-    sliderA.max = 9999; inputA.max = 9999;
-    sliderB.max = 999;  inputB.max = 999;
-  } else {
-    document.getElementById('labelA').textContent = 'Dividend';
-    document.getElementById('labelB').textContent = 'Divisor';
-    sliderA.max = 9999; inputA.max = 9999;
-    sliderB.max = 999;  inputB.max = 999;
+function checkAnswer() {
+  if (answered) return;
+  const input = document.getElementById('answerInput');
+  const feedback = document.getElementById('feedbackMsg');
+  const userAnswer = parseInt(input.value);
+  const correct = getCorrectAnswer();
+
+  if (isNaN(userAnswer)) {
+    input.focus();
+    return;
   }
-  hideAnswer();
-  update();
+
+  if (userAnswer === correct) {
+    answered = true;
+    input.classList.remove('wrong');
+    input.classList.add('correct');
+    input.readOnly = true;
+    feedback.className = 'feedback-msg success';
+    feedback.textContent = '';
+
+    // Points: 10 base points
+    let pts = 10;
+    streak++;
+
+    // Streak bonus: 10 extra points for every 10 correct in a row
+    if (streak > 0 && streak % 10 === 0) {
+      pts += 10;
+      setTimeout(() => {
+        const bonus = document.createElement('div');
+        bonus.className = 'bonus-popup';
+        bonus.textContent = '🔥 10 STREAK BONUS! +10 🔥';
+        document.body.appendChild(bonus);
+        setTimeout(() => bonus.remove(), 2500);
+      }, 600);
+    }
+
+    addPoints(pts);
+    updateStreak();
+    questionsAnswered++;
+    calculateLevel();
+    launchCelebration();
+
+    // Show next button after celebration
+    setTimeout(() => {
+      document.getElementById('nextBtn').classList.add('visible');
+    }, 800);
+
+  } else {
+    wrongCount++;
+    streak = 0;
+    updateStreak();
+    updateWrongDots();
+    input.classList.remove('correct');
+    input.classList.add('wrong');
+    input.classList.remove('shake');
+    void input.offsetWidth;
+    input.classList.add('shake');
+    input.value = '';
+
+    feedback.className = 'feedback-msg tryagain';
+
+    if (wrongCount >= 3) {
+      // After 3 wrong: show reveal button
+      feedback.textContent = '3 wrong tries — you can see the answer or keep trying!';
+      document.getElementById('revealBtn').classList.add('visible');
+    } else {
+      const encouragements = [
+        'Almost! Try again 💪',
+        'Not quite — give it another shot!',
+        'So close! Try once more 🤔',
+        'Hmm, not that one — keep going!',
+        'Try again, you got this! 🌟',
+      ];
+      feedback.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
+      feedback.textContent += ` (${3 - wrongCount} tries left)`;
+    }
+
+    input.focus();
+  }
 }
 
-function syncFromSlider(id) {
-  const val = document.getElementById('slider' + id).value;
-  document.getElementById('input' + id).value = val;
-  hideAnswer();
-  update();
-}
-
-function syncFromInput(id) {
-  let val = parseInt(document.getElementById('input' + id).value);
-  const slider = document.getElementById('slider' + id);
-  if (isNaN(val) || val < 1) val = 1;
-  const max = parseInt(slider.max);
-  if (val > max) val = max;
-  document.getElementById('input' + id).value = val;
-  slider.value = val;
-  hideAnswer();
-  update();
-}
-
-function getVals() {
-  return {
-    a: Math.max(1, parseInt(document.getElementById('inputA').value) || 1),
-    b: Math.max(1, parseInt(document.getElementById('inputB').value) || 1)
-  };
-}
-
-function hideAnswer() {
-  document.getElementById('answerBox').style.display = 'none';
-  if (document.getElementById('answerInput')) resetAnswerState();
-}
 function revealAnswer() {
   answered = true;
+  const correct = getCorrectAnswer();
   document.getElementById('answerBox').style.display = 'block';
   document.getElementById('answerInput').readOnly = true;
+  document.getElementById('checkBtn').style.display = 'none';
+  document.getElementById('revealBtn').classList.remove('visible');
+  document.getElementById('feedbackMsg').textContent = '';
+
+  // Show next button
+  document.getElementById('nextBtn').classList.add('visible');
 }
+
+function nextQuestion() {
+  document.getElementById('checkBtn').style.display = '';
+  document.getElementById('answerBox').style.display = 'none';
+  generateQuestion();
+}
+
 function toggleSteps() {
   const area = document.getElementById('stepsArea');
   area.classList.toggle('visible', document.getElementById('stepsToggle').checked);
 }
 
-function update() {
-  const { a, b } = getVals();
-  if (mode === 'mult') renderMultiplication(a, b);
-  else renderDivision(a, b);
-  if (document.getElementById('stepsToggle').checked)
-    document.getElementById('stepsArea').classList.add('visible');
+function resetAnswerState() {
+  const input = document.getElementById('answerInput');
+  const feedback = document.getElementById('feedbackMsg');
+  input.value = '';
+  input.readOnly = false;
+  input.classList.remove('correct', 'wrong', 'shake');
+  feedback.textContent = '';
+  feedback.className = 'feedback-msg';
 }
 
 /* ───────── MULTIPLICATION ───────── */
@@ -576,7 +1009,8 @@ function renderVisualMult(a, b, total) {
   const container = document.getElementById('groupsContainer');
   container.innerHTML = '';
 
-  if (total <= 80 && a <= 20 && b <= 20) {
+  if (total <= 50 && a <= 10 && b <= 10) {
+    // Small numbers: show apple groups
     document.getElementById('visualTitle').textContent =
       `${a} group${a>1?'s':''} of ${b} 🍎`;
     for (let g = 0; g < a; g++) {
@@ -589,25 +1023,126 @@ function renderVisualMult(a, b, total) {
       }
       container.appendChild(div);
     }
-  } else {
-    // Area model rectangle
+  } else if (total <= 144 && a <= 12 && b <= 12) {
+    // Medium numbers: show a neat grid of apples (rows × columns)
     document.getElementById('visualTitle').textContent =
-      `Area model: ${a} × ${b} = ${total.toLocaleString()}`;
-    const maxW = 340, maxH = 140;
-    const scale = Math.min(maxW / a, maxH / b, 2);
-    const w = Math.max(Math.round(a * scale), 60);
-    const h = Math.max(Math.round(b * scale), 40);
-    container.innerHTML = `
-      <div class="area-model">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.9em;color:#888;">${b}</div>
-          <div class="area-rect" style="width:${w}px;height:${h}px;">
-            ${a} × ${b}<br><span style="font-size:0.85em;opacity:0.8">= ${total.toLocaleString()}</span>
-          </div>
+      `${a} rows × ${b} columns = ? 🍎`;
+    const grid = document.createElement('div');
+    grid.className = 'apple-grid';
+    grid.style.gridTemplateColumns = `repeat(${b}, 1fr)`;
+    for (let i = 0; i < a * b; i++) {
+      const s = document.createElement('span');
+      s.className = 'item'; s.textContent = '🍎';
+      grid.appendChild(s);
+    }
+    container.appendChild(grid);
+  } else {
+    // Large numbers: break-apart strategy
+    // Break the bigger number into easy parts
+    // e.g. 24 × 13 → 24×10 + 24×3
+    // Bars are proportional to the total, so parts visually add up
+    // Don't show the total — the child has to figure that out!
+    const parts = breakApart(a, b);
+    const barColors = ['#e74c3c', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
+
+    document.getElementById('visualTitle').textContent =
+      `Break it apart: ${a} × ${b}`;
+
+    let html = '<div class="break-apart">';
+    parts.forEach((p, i) => {
+      const color = barColors[i % barColors.length];
+      html += `<div class="break-part">
+        <span class="break-label">${a} × ${p.factor} = </span>
+        <div class="break-input-row">
+          <input type="number" class="break-input" id="subInput${i}" data-answer="${p.value}" data-index="${i}" data-color="${color}" placeholder="?" onkeydown="if(event.key==='Enter')checkSubProblem(${i})">
+          <button class="break-check-btn" onclick="checkSubProblem(${i})">Check</button>
+          <span class="break-result" id="subResult${i}"></span>
         </div>
-        <div style="font-size:0.9em;color:#888;margin-left:22px;">${a}</div>
+        <div class="break-bar" id="subBar${i}" style="width:0%;background:${color};display:none;"></div>
       </div>`;
+    });
+    // Hint row: updates as sub-problems are solved
+    html += `<div class="break-total" id="breakTotal">
+      <span class="break-label" id="breakTotalLabel">Solve the parts above, then answer below!</span>
+    </div>`;
+    html += '</div>';
+    container.innerHTML = html;
   }
+}
+
+function checkSubProblem(index) {
+  const input = document.getElementById('subInput' + index);
+  const result = document.getElementById('subResult' + index);
+  const bar = document.getElementById('subBar' + index);
+  const correctVal = parseInt(input.dataset.answer);
+  const userVal = parseInt(input.value);
+  const color = input.dataset.color;
+
+  if (isNaN(userVal)) { input.focus(); return; }
+
+  if (userVal === correctVal) {
+    input.classList.remove('wrong');
+    input.classList.add('correct');
+    input.readOnly = true;
+    result.textContent = correctVal;
+    result.classList.add('visible');
+    result.style.color = '#27ae60';
+
+    // Show the bar with correct proportional width
+    const total = currentA * currentB;
+    const widthPct = Math.max((correctVal / total) * 100, 5);
+    bar.style.display = 'flex';
+    bar.style.width = widthPct + '%';
+    bar.textContent = correctVal;
+
+    // Update the total hint if all sub-problems are solved
+    updateBreakTotal();
+  } else {
+    input.classList.remove('correct');
+    input.classList.add('wrong');
+    input.classList.remove('shake');
+    void input.offsetWidth;
+    input.classList.add('shake');
+    input.value = '';
+    result.textContent = 'Try again!';
+    result.classList.add('visible');
+    result.style.color = '#e74c3c';
+    input.focus();
+  }
+}
+
+function updateBreakTotal() {
+  const allInputs = document.querySelectorAll('.break-input');
+  const solved = [];
+  let allDone = true;
+  allInputs.forEach(inp => {
+    if (inp.classList.contains('correct')) {
+      solved.push(parseInt(inp.dataset.answer));
+    } else {
+      allDone = false;
+    }
+  });
+
+  const label = document.getElementById('breakTotalLabel');
+  if (allDone && solved.length > 0) {
+    const sumExpr = solved.join(' + ');
+    label.textContent = sumExpr + ' = ?';
+  } else if (solved.length > 0) {
+    label.textContent = 'Keep going — solve the remaining parts!';
+  }
+}
+
+function breakApart(a, b) {
+  // Break b into place-value parts: 13 → [10, 3], 245 → [200, 40, 5]
+  const bStr = String(b);
+  const parts = [];
+  for (let i = 0; i < bStr.length; i++) {
+    const digit = parseInt(bStr[i]);
+    if (digit === 0) continue;
+    const placeValue = digit * Math.pow(10, bStr.length - 1 - i);
+    parts.push({ factor: placeValue, value: a * placeValue });
+  }
+  return parts;
 }
 
 /* ───────── LONG MULTIPLICATION WORKINGS ───────── */
@@ -616,38 +1151,27 @@ function buildMultWorkings(a, b) {
   const bStr = String(b);
   const total = a * b;
   const totalStr = String(total);
-
   const numCols = totalStr.length;
   const placeNames = ['ones', 'tens', 'hundreds', 'thousands', 'ten-thousands'];
 
-  // ── 1. Column layout table ──
-  // We need enough columns for the widest number
   function makeColTable(rows) {
-    // rows: array of { type, op, digits, carries }
-    // digits: array of length numCols (null = empty)
     let html = '<table class="col-table">';
     rows.forEach(row => {
       if (row.type === 'sep') {
-        html += `<tr class="sep-row">`;
-        html += `<td class="op-cell"></td>`;
+        html += `<tr class="sep-row"><td class="op-cell"></td>`;
         for (let c = 0; c < numCols; c++) html += '<td></td>';
-        html += '</tr>';
-        return;
+        html += '</tr>'; return;
       }
       if (row.type === 'carry') {
-        html += `<tr class="carry-row">`;
-        html += `<td class="op-cell"></td>`;
+        html += `<tr class="carry-row"><td class="op-cell"></td>`;
         for (let c = 0; c < numCols; c++) {
           const v = row.digits[c];
           html += `<td>${v != null && v !== 0 ? v : ''}</td>`;
         }
-        html += '</tr>';
-        return;
+        html += '</tr>'; return;
       }
-      const cls = row.type === 'result' ? 'result-row' :
-                  row.type === 'partial' ? 'partial-row' : '';
-      html += `<tr class="${cls}">`;
-      html += `<td class="op-cell">${row.op || ''}</td>`;
+      const cls = row.type === 'result' ? 'result-row' : row.type === 'partial' ? 'partial-row' : '';
+      html += `<tr class="${cls}"><td class="op-cell">${row.op || ''}</td>`;
       for (let c = 0; c < numCols; c++) {
         const v = row.digits[c];
         html += `<td class="${v == null ? 'dim' : ''}">${v != null ? v : '·'}</td>`;
@@ -661,21 +1185,16 @@ function buildMultWorkings(a, b) {
   function numToDigitRow(n, op, type) {
     const s = String(n);
     const digits = new Array(numCols).fill(null);
-    for (let i = 0; i < s.length; i++) {
-      digits[numCols - s.length + i] = s[i];
-    }
+    for (let i = 0; i < s.length; i++) digits[numCols - s.length + i] = s[i];
     return { type: type || 'number', op, digits };
   }
 
-  // Compute partial products and carries for each digit of b
   const partialInfos = [];
   for (let i = bStr.length - 1; i >= 0; i--) {
     const bDigit = parseInt(bStr[i]);
     const shift = bStr.length - 1 - i;
     const partialVal = a * bDigit;
     const fullVal = partialVal * Math.pow(10, shift);
-
-    // Digit-by-digit carry computation
     const aDigits = aStr.split('').map(Number);
     let carry = 0;
     const digitSteps = [];
@@ -687,38 +1206,22 @@ function buildMultWorkings(a, b) {
       carry = newCarry;
     }
     if (carry > 0) digitSteps.unshift({ aDigit: null, bDigit, carry: 0, prod: carry, write: carry, newCarry: 0, isFinalCarry: true });
-
-    // Carry row for the column table
-    // carry[j] = carry going INTO column (numCols-1-shift - (aStr.length-1-j))
-    // The carry from position j feeds into position j-1 of the result
     const carryRow = new Array(numCols).fill(null);
     let c2 = 0;
     for (let j = aDigits.length - 1; j >= 0; j--) {
       const prod = aDigits[j] * bDigit + c2;
       c2 = Math.floor(prod / 10);
-      // carry c2 goes into the next (more significant) digit position
-      // in the partial result, digit j is at column (numCols - shift - (aStr.length - j))
       const col = numCols - shift - (aStr.length - j) - 1;
       if (c2 > 0 && col >= 0) carryRow[col] = c2;
     }
-
     partialInfos.push({ bDigit, shift, partialVal, fullVal, digitSteps, carryRow });
   }
 
-  // Setup table rows
-  const tableRows = [
-    numToDigitRow(a, '', 'number'),
-    numToDigitRow(b, '×', 'number'),
-    { type: 'sep' },
-  ];
-
+  const tableRows = [numToDigitRow(a, '', 'number'), numToDigitRow(b, '×', 'number'), { type: 'sep' }];
   partialInfos.forEach(info => {
-    if (bStr.length > 1) {
-      tableRows.push({ type: 'carry', digits: info.carryRow });
-    }
+    if (bStr.length > 1) tableRows.push({ type: 'carry', digits: info.carryRow });
     tableRows.push(numToDigitRow(info.fullVal, bStr.length > 1 ? '+' : '', 'partial'));
   });
-
   if (bStr.length > 1) {
     tableRows.push({ type: 'sep' });
     tableRows.push(numToDigitRow(total, '', 'result'));
@@ -728,65 +1231,43 @@ function buildMultWorkings(a, b) {
   html += '<div style="text-align:center;font-weight:bold;color:#888;margin-bottom:12px;font-size:0.95em;">Column method — aligned by place value</div>';
   html += makeColTable(tableRows);
 
-  // ── 2. Step-by-step digit explanations ──
   partialInfos.forEach((info, idx) => {
-    const stepNum = idx + 1;
     const placeName = placeNames[info.shift] || `×10<sup>${info.shift}</sup>`;
     const shiftNote = info.shift > 0
       ? ` — <span class="place-note">this is the <em>${placeName}</em> digit of ${b}, so shift result ${info.shift} place${info.shift>1?'s':''} left (add ${info.shift} zero${info.shift>1?'s':''})</span>`
       : '';
-
-    html += `<div class="step-section">`;
-    html += `<div class="step-title">Step ${stepNum}: ${a} × ${info.bDigit}${shiftNote}</div>`;
-
+    html += `<div class="step-section"><div class="step-title">Step ${idx+1}: ${a} × ${info.bDigit}${shiftNote}</div>`;
     if (info.bDigit === 0) {
       html += `<div class="digit-steps"><div class="digit-step">Anything × 0 = 0</div></div>`;
     } else {
       html += `<div class="digit-steps">`;
       info.digitSteps.forEach(s => {
-        if (s.isFinalCarry) {
-          html += `<div class="digit-step">  Final carry → write <strong>${s.write}</strong></div>`;
-          return;
-        }
+        if (s.isFinalCarry) { html += `<div class="digit-step">  Final carry → write <strong>${s.write}</strong></div>`; return; }
         let line = `${s.aDigit} × ${s.bDigit}`;
         if (s.carry > 0) line += ` + <span class="carry-num">${s.carry}</span> (carry)`;
         line += ` = ${s.prod}`;
-        if (s.newCarry > 0) {
-          line += `  →  write <strong>${s.write}</strong>, carry <span class="carry-num">${s.newCarry}</span>`;
-        } else {
-          line += `  →  write <strong>${s.write}</strong>`;
-        }
+        if (s.newCarry > 0) line += `  →  write <strong>${s.write}</strong>, carry <span class="carry-num">${s.newCarry}</span>`;
+        else line += `  →  write <strong>${s.write}</strong>`;
         html += `<div class="digit-step">• ${line}</div>`;
       });
       html += '</div>';
     }
-
     const fullStr = String(info.fullVal);
     html += `<div class="partial-result">`;
-    if (info.shift > 0) {
-      html += `${a} × ${info.bDigit} = ${info.partialVal}, `;
-      html += `then add ${'0'.repeat(info.shift)} → <strong>${fullStr}</strong>`;
-    } else {
-      html += `Result: <strong>${fullStr}</strong>`;
-    }
+    if (info.shift > 0) html += `${a} × ${info.bDigit} = ${info.partialVal}, then add ${'0'.repeat(info.shift)} → <strong>${fullStr}</strong>`;
+    else html += `Result: <strong>${fullStr}</strong>`;
     html += `</div></div>`;
   });
 
-  // ── 3. Final addition explanation ──
   if (bStr.length > 1) {
-    html += `<div class="step-section add-section">`;
-    html += `<div class="step-title">Final step: add all partial products</div>`;
-    html += `<div class="digit-steps">`;
+    html += `<div class="step-section add-section"><div class="step-title">Final step: add all partial products</div><div class="digit-steps">`;
     partialInfos.forEach(info => {
       html += `<div class="digit-step">${a} × ${info.bDigit}${'0'.repeat(info.shift)} = ${info.fullVal.toLocaleString()}</div>`;
     });
-    html += `</div>`;
-    html += `<div class="partial-result" style="color:#27ae60;font-size:1.3em;">`;
+    html += `</div><div class="partial-result" style="color:#27ae60;font-size:1.3em;">`;
     html += partialInfos.map(i => i.fullVal.toLocaleString()).join(' + ');
-    html += ` = <strong>${total.toLocaleString()}</strong>`;
-    html += `</div></div>`;
+    html += ` = <strong>${total.toLocaleString()}</strong></div></div>`;
   }
-
   html += '</div>';
   return html;
 }
@@ -800,7 +1281,6 @@ function renderDivision(total, divisor) {
   document.getElementById('answerBox').textContent =
     `= ${quotient}` + (remainder ? ` remainder ${remainder}` : '');
 
-  // Visual
   const container = document.getElementById('groupsContainer');
   container.innerHTML = '';
   const showPiles = Math.min(quotient, 12);
@@ -852,7 +1332,6 @@ function buildDivWorkings(dividend, divisor) {
   let current = 0;
   let quotientStr = '';
   const steps = [];
-
   for (let i = 0; i < dividendStr.length; i++) {
     current = current * 10 + parseInt(dividendStr[i]);
     const q = Math.floor(current / divisor);
@@ -861,18 +1340,13 @@ function buildDivWorkings(dividend, divisor) {
     steps.push({ current, q, subtract: q * divisor, rem });
     current = rem;
   }
-
   const cleanQ = parseInt(quotientStr);
   const finalRem = steps[steps.length - 1].rem;
   const dLen = dividendStr.length;
   const sep = '─'.repeat(dLen + String(divisor).length + 5);
-
   let lines = [];
-  const pad = n => String(n);
-
   lines.push(`<span class="step">  ${divisor} ) ${dividendStr}</span>`);
   lines.push(`<span class="line-sep">  ${sep}</span>`);
-
   for (let i = 0; i < steps.length; i++) {
     const s = steps[i];
     const indent = '       ' + ' '.repeat(i * 2);
@@ -883,64 +1357,15 @@ function buildDivWorkings(dividend, divisor) {
       lines.push(`<span class="step">${indent}${s.current} − ${s.subtract} = ${s.rem}</span>`);
     }
   }
-
   lines.push('');
   lines.push(`<span class="line-sep">  ${sep}</span>`);
   const remNote = finalRem > 0 ? `  remainder ${finalRem}` : '';
   lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${remNote}</span>`);
-
   return `<div class="div-workings">${lines.join('\n')}</div>`;
 }
 
-/* ───────── ANSWER CHECKING & CELEBRATION ───────── */
-let answered = false;
-
-function getCorrectAnswer() {
-  const { a, b } = getVals();
-  if (mode === 'mult') return a * b;
-  return Math.floor(a / b);  // quotient for division
-}
-
-function checkAnswer() {
-  if (answered) return;
-  const input = document.getElementById('answerInput');
-  const feedback = document.getElementById('feedbackMsg');
-  const userAnswer = parseInt(input.value);
-  const correct = getCorrectAnswer();
-
-  if (isNaN(userAnswer)) {
-    input.focus();
-    return;
-  }
-
-  if (userAnswer === correct) {
-    answered = true;
-    input.classList.remove('wrong');
-    input.classList.add('correct');
-    input.readOnly = true;
-    feedback.className = 'feedback-msg success';
-    feedback.textContent = '';
-    launchCelebration();
-  } else {
-    input.classList.remove('correct');
-    input.classList.add('wrong');
-    input.classList.remove('shake');
-    void input.offsetWidth; // reflow to restart animation
-    input.classList.add('shake');
-    feedback.className = 'feedback-msg tryagain';
-    const encouragements = [
-      'Almost! Try again 💪',
-      'Not quite — give it another shot!',
-      'So close! Try once more 🤔',
-      'Hmm, not that one — keep going!',
-      'Try again, you got this! 🌟',
-    ];
-    feedback.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
-  }
-}
-
+/* ───────── CELEBRATION ───────── */
 function launchCelebration() {
-  // Confetti burst
   const colors = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#ff6b81'];
   for (let i = 0; i < 80; i++) {
     const conf = document.createElement('div');
@@ -957,14 +1382,12 @@ function launchCelebration() {
     setTimeout(() => conf.remove(), 4000);
   }
 
-  // Big "CORRECT!" text
   const text = document.createElement('div');
   text.className = 'celebration-text';
   text.textContent = '⭐ CORRECT! ⭐';
   document.body.appendChild(text);
   setTimeout(() => text.remove(), 1500);
 
-  // Star burst from center
   const stars = ['⭐','🌟','✨','💫','🎉','🎊','🏆','💥'];
   for (let i = 0; i < 14; i++) {
     const star = document.createElement('div');
@@ -985,19 +1408,8 @@ function launchCelebration() {
   }
 }
 
-function resetAnswerState() {
-  answered = false;
-  const input = document.getElementById('answerInput');
-  const feedback = document.getElementById('feedbackMsg');
-  input.value = '';
-  input.readOnly = false;
-  input.classList.remove('correct', 'wrong', 'shake');
-  feedback.textContent = '';
-  feedback.className = 'feedback-msg';
-}
-
-// Init
-update();
+/* ───────── INIT ───────── */
+// Game starts when player clicks "Start Game!" on the start screen
 </script>
 </body>
 </html>
