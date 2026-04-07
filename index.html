@@ -363,13 +363,7 @@ h1 {
   100% { opacity: 0; transform: translateY(-80px) scale(0.5); }
 }
 
-/* Celebration overlay */
-.celebration-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none;
-  z-index: 9999;
-}
+/* Celebration text */
 .celebration-text {
   position: fixed;
   top: 50%;
@@ -586,6 +580,29 @@ h1 {
 }
 .start-game-btn:hover { background: #219150; transform: scale(1.05); }
 
+/* Language picker */
+.lang-picker {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.lang-btn {
+  padding: 6px 16px;
+  font-size: 0.9em;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  background: #fafafa;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.lang-btn.active {
+  border-color: #3498db;
+  background: #ebf5fb;
+}
+.lang-btn:hover { border-color: #bbb; }
+
 /* Best streak footer */
 .best-streak-bar {
   text-align: center;
@@ -608,8 +625,12 @@ h1 {
 
 <div class="start-screen" id="startScreen">
   <div class="start-card">
-    <h2>🍎 Gabriel's Math Game</h2>
-    <div class="start-subtitle">Choose your starting level</div>
+    <div class="lang-picker">
+      <button class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
+      <button class="lang-btn" onclick="setLang('sv')">🇸🇪 Svenska</button>
+    </div>
+    <h2 id="startTitle">🍎 Gabriel's Math Game</h2>
+    <div class="start-subtitle" id="startSubtitle">Choose your starting level</div>
     <div class="level-picker">
       <button class="level-pick-btn selected" onclick="pickLevel(1, this)">
         <span class="lvl-num">1</span>
@@ -652,28 +673,28 @@ h1 {
         <span class="lvl-range">10–99 × 2–50</span>
       </button>
     </div>
-    <button class="start-game-btn" onclick="startGame()">Start Game! 🚀</button>
+    <button class="start-game-btn" id="startGameBtn" onclick="startGame()">Start Game! 🚀</button>
   </div>
 </div>
 
-<h1>🍎 Gabriel's Math Game</h1>
+<h1 id="mainTitle">🍎 Gabriel's Math Game</h1>
 
 <div class="score-bar">
   <div class="score-item">
-    <span class="label">Score</span>
+    <span class="label" id="labelScore">Score</span>
     <span class="value points" id="scoreDisplay">0</span>
   </div>
   <div class="score-item">
-    <span class="label">Streak</span>
+    <span class="label" id="labelStreak">Streak</span>
     <span class="value streak" id="streakDisplay">0</span>
     <span class="streak-fire" id="streakFire">🔥</span>
   </div>
   <div class="score-item">
-    <span class="label">Level</span>
+    <span class="label" id="labelLevel">Level</span>
     <span class="value level" id="levelDisplay">1</span>
   </div>
   <div class="score-item">
-    <span class="label">Tries left</span>
+    <span class="label" id="labelTries">Tries left</span>
     <div class="wrong-dots" id="wrongDots">
       <div class="wrong-dot" id="dot0"></div>
       <div class="wrong-dot" id="dot1"></div>
@@ -683,9 +704,9 @@ h1 {
 </div>
 
 <div class="mode-buttons">
-  <button class="mode-btn both active" onclick="setMode('both')">Both</button>
-  <button class="mode-btn mult" onclick="setMode('mult')">✖ Only</button>
-  <button class="mode-btn div"  onclick="setMode('div')">➗ Only</button>
+  <button class="mode-btn both active" id="modeBoth" onclick="setMode('both')">Both</button>
+  <button class="mode-btn mult" id="modeMult" onclick="setMode('mult')">✖ Only</button>
+  <button class="mode-btn div" id="modeDiv" onclick="setMode('div')">➗ Only</button>
 </div>
 
 <div class="card">
@@ -700,19 +721,19 @@ h1 {
     <div class="equation" id="equation"></div>
     <div class="answer-input-row">
       <input type="number" class="answer-input" id="answerInput" placeholder="?" onkeydown="if(event.key==='Enter')checkAnswer()">
-      <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check! ✓</button>
+      <button class="check-btn" id="checkBtn" onclick="checkAnswer()" data-t="check">Check! ✓</button>
     </div>
     <div class="feedback-msg" id="feedbackMsg"></div>
-    <button class="reveal-btn" id="revealBtn" onclick="revealAnswer()">Show me the answer</button>
+    <button class="reveal-btn" id="revealBtn" onclick="revealAnswer()" data-t="showAnswer">Show me the answer</button>
     <div class="answer-box" id="answerBox"></div>
-    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question ➜</button>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()" data-t="nextQuestion">Next Question ➜</button>
   </div>
 </div>
 
 <div class="card">
   <label class="steps-toggle">
     <input type="checkbox" id="stepsToggle" onchange="toggleSteps()">
-    Show step-by-step hand workings
+    <span id="labelWorkings">Show step-by-step hand workings</span>
   </label>
   <div class="steps-area" id="stepsArea">
     <div id="workings"></div>
@@ -720,47 +741,211 @@ h1 {
 </div>
 
 <div class="best-streak-bar">
-  🏆 Best streak: <span id="bestStreakValue">0</span> in a row
+  🏆 <span id="labelBestStreak">Best streak:</span> <span id="bestStreakValue">0</span> <span id="labelInARow">in a row</span>
 </div>
 
 <script>
+/* ───────── TRANSLATIONS ───────── */
+const TRANSLATIONS = {
+  en: {
+    // Start screen
+    title: "🍎 Gabriel's Math Game",
+    chooseLevel: "Choose your starting level",
+    startGame: "Start Game! 🚀",
+    // Level labels
+    easy: "Easy", medium: "Medium", hard: "Hard", expert: "Expert",
+    // Score bar
+    score: "Score", streak: "Streak", level: "Level", triesLeft: "Tries left",
+    // Mode buttons
+    both: "Both", multOnly: "✖ Only", divOnly: "➗ Only",
+    // Game UI
+    check: "Check! ✓",
+    showAnswer: "Show me the answer",
+    nextQuestion: "Next Question ➜",
+    showWorkings: "Show step-by-step hand workings",
+    bestStreak: "Best streak:",
+    inARow: "in a row",
+    // Difficulty badge
+    levelBadge: "Level {level} — {label}",
+    // Feedback
+    correct: "⭐ CORRECT! ⭐",
+    streakBonus: "🔥 10 STREAK BONUS! +10 🔥",
+    threeWrong: "3 wrong tries — you can see the answer or keep trying!",
+    triesRemaining: "({n} tries left)",
+    encouragements: [
+      "Almost! Try again 💪",
+      "Not quite — give it another shot!",
+      "So close! Try once more 🤔",
+      "Hmm, not that one — keep going!",
+      "Try again, you got this! 🌟",
+    ],
+    // Visual aids - multiplication
+    groupsOf: "{a} group{s} of {b} 🍎",
+    rowsCols: "{a} rows × {b} columns = ? 🍎",
+    breakApart: "Break it apart: {a} × {b}",
+    solvePartsHint: "Solve the parts above, then answer below!",
+    keepGoing: "Keep going — solve the remaining parts!",
+    tryAgain: "Try again!",
+    // Visual aids - division
+    sharedIntoGroups: "{total} 🍎 shared into groups of {divisor} → {quotient} group{s}",
+    plusLeftover: " + {n} left over",
+    moreGroups: "… and {n} more group{s}",
+    leftover: "leftover",
+    tooMany: "Too many to show visually — see the workings below 🤓",
+    justQuotient: "(just the quotient)",
+    remainder: "remainder",
+    // Division workings (simple)
+    because: "because",
+    leftOverText: "left over",
+    // Division workings (long)
+    lessThan: "(less than {divisor}, write 0, bring down next digit)",
+    since: "since",
+    // Multiplication workings
+    columnMethod: "Column method — aligned by place value",
+    placeNames: ["ones", "tens", "hundreds", "thousands", "ten-thousands"],
+    step: "Step",
+    anythingTimesZero: "Anything × 0 = 0",
+    finalCarry: "Final carry → write",
+    carry: "carry",
+    result: "Result",
+    thenAddZeros: "then add",
+    finalStep: "Final step: add all partial products",
+    // Place value shift notes
+    thisIsThe: "this is the",
+    digitOf: "digit of",
+    soShift: "so shift result",
+    placeLeft: "place{s} left",
+    addZeros: "add",
+    zero: "zero",
+  },
+  sv: {
+    title: "🍎 Gabriels Mattespel",
+    chooseLevel: "Välj startnivå",
+    startGame: "Starta spelet! 🚀",
+    easy: "Lätt", medium: "Medel", hard: "Svår", expert: "Expert",
+    score: "Poäng", streak: "Svit", level: "Nivå", triesLeft: "Försök kvar",
+    both: "Båda", multOnly: "✖ Bara", divOnly: "➗ Bara",
+    check: "Kolla! ✓",
+    showAnswer: "Visa svaret",
+    nextQuestion: "Nästa fråga ➜",
+    showWorkings: "Visa steg-för-steg-uträkning",
+    bestStreak: "Bästa svit:",
+    inARow: "i rad",
+    levelBadge: "Nivå {level} — {label}",
+    correct: "⭐ RÄTT! ⭐",
+    streakBonus: "🔥 10 I RAD BONUS! +10 🔥",
+    threeWrong: "3 fel försök — du kan visa svaret eller fortsätta försöka!",
+    triesRemaining: "({n} försök kvar)",
+    encouragements: [
+      "Nästan! Försök igen 💪",
+      "Inte riktigt — prova en gång till!",
+      "Så nära! Försök igen 🤔",
+      "Hmm, inte den — fortsätt!",
+      "Försök igen, du klarar det! 🌟",
+    ],
+    groupsOf: "{a} grupp{s_sv} med {b} 🍎",
+    rowsCols: "{a} rader × {b} kolumner = ? 🍎",
+    breakApart: "Dela upp: {a} × {b}",
+    solvePartsHint: "Lös delarna ovan, svara sedan nedan!",
+    keepGoing: "Fortsätt — lös de återstående delarna!",
+    tryAgain: "Försök igen!",
+    sharedIntoGroups: "{total} 🍎 delas i grupper om {divisor} → {quotient} grupp{s_sv}",
+    plusLeftover: " + {n} över",
+    moreGroups: "… och {n} grupp{s_sv} till",
+    leftover: "överblivet",
+    tooMany: "För många att visa — se uträkningen nedan 🤓",
+    justQuotient: "(bara kvoten)",
+    remainder: "rest",
+    because: "eftersom",
+    leftOverText: "över",
+    lessThan: "(mindre än {divisor}, skriv 0, ta ner nästa siffra)",
+    since: "eftersom",
+    columnMethod: "Kolumnmetoden — uppställt efter platsvärde",
+    placeNames: ["ental", "tiotal", "hundratal", "tusental", "tiotusental"],
+    step: "Steg",
+    anythingTimesZero: "Vad som helst × 0 = 0",
+    finalCarry: "Sista minnessiffran → skriv",
+    carry: "minne",
+    result: "Resultat",
+    thenAddZeros: "lägg sedan till",
+    finalStep: "Sista steget: lägg ihop alla delprodukter",
+    thisIsThe: "detta är",
+    digitOf: "-siffran i",
+    soShift: "flytta resultatet",
+    placeLeft: "steg åt vänster",
+    addZeros: "lägg till",
+    zero: "nolla",
+  }
+};
+
+let lang = 'en';
+function t(key) { return TRANSLATIONS[lang][key] || TRANSLATIONS.en[key] || key; }
+
 /* ───────── GAME STATE ───────── */
-let mode = 'both';        // 'both', 'mult', or 'div'
-let questionMode = 'mult'; // actual mode for the current question
+let mode = 'both';
+let questionMode = 'mult';
 let score = 0;
 let streak = 0;
 let level = 1;
-let wrongCount = 0;       // wrong attempts on current question
+let wrongCount = 0;
 let answered = false;
-let questionsAnswered = 0; // total questions answered correctly (for leveling)
+let questionsAnswered = 0;
 let bestStreak = 0;
 let startingLevel = 1;
 let currentA = 0;
 let currentB = 0;
 
+/* ───────── LANGUAGE ───────── */
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  applyTranslations();
+}
+
+function applyTranslations() {
+  // Start screen
+  document.getElementById('startTitle').textContent = t('title');
+  document.getElementById('startSubtitle').textContent = t('chooseLevel');
+  document.getElementById('startGameBtn').textContent = t('startGame');
+  // Level picker labels
+  const levelLabels = ['easy','easy','medium','medium','hard','hard','expert','expert'];
+  document.querySelectorAll('.level-pick-btn .lvl-label').forEach((el, i) => {
+    el.textContent = t(levelLabels[i]);
+  });
+  // Main game UI
+  document.getElementById('mainTitle').textContent = t('title');
+  document.getElementById('labelScore').textContent = t('score');
+  document.getElementById('labelStreak').textContent = t('streak');
+  document.getElementById('labelLevel').textContent = t('level');
+  document.getElementById('labelTries').textContent = t('triesLeft');
+  document.getElementById('modeBoth').textContent = t('both');
+  document.getElementById('modeMult').textContent = t('multOnly');
+  document.getElementById('modeDiv').textContent = t('divOnly');
+  document.getElementById('checkBtn').textContent = t('check');
+  document.getElementById('revealBtn').textContent = t('showAnswer');
+  document.getElementById('nextBtn').textContent = t('nextQuestion');
+  document.getElementById('labelWorkings').textContent = t('showWorkings');
+  document.getElementById('labelBestStreak').textContent = t('bestStreak');
+  document.getElementById('labelInARow').textContent = t('inARow');
+  // Update page title
+  document.title = t('title').replace('🍎 ', '');
+}
+
 /* ───────── DIFFICULTY / QUESTION GENERATION ───────── */
-// Level determines the number ranges
-// Level 1: 1-5 × 1-5       (or divide results up to 25)
-// Level 2: 2-7 × 2-7
-// Level 3: 2-9 × 2-9
-// Level 4: 2-12 × 2-12
-// Level 5: 5-15 × 2-12
-// Level 6: 10-25 × 2-15
-// Level 7: 10-50 × 2-20
-// Level 8+: 10-99 × 2-50
+const LEVEL_CONFIGS = [
+  { minA: 1, maxA: 5,  minB: 1, maxB: 5,  label: 'Easy' },
+  { minA: 2, maxA: 7,  minB: 2, maxB: 7,  label: 'Easy' },
+  { minA: 2, maxA: 9,  minB: 2, maxB: 9,  label: 'Medium' },
+  { minA: 2, maxA: 12, minB: 2, maxB: 12, label: 'Medium' },
+  { minA: 5, maxA: 15, minB: 2, maxB: 12, label: 'Hard' },
+  { minA: 10, maxA: 25, minB: 2, maxB: 15, label: 'Hard' },
+  { minA: 10, maxA: 50, minB: 2, maxB: 20, label: 'Expert' },
+  { minA: 10, maxA: 99, minB: 2, maxB: 50, label: 'Expert' },
+];
 
 function getLevelConfig(lvl) {
-  const configs = [
-    { minA: 1, maxA: 5,  minB: 1, maxB: 5,  label: 'Easy' },        // Level 1
-    { minA: 2, maxA: 7,  minB: 2, maxB: 7,  label: 'Easy' },        // Level 2
-    { minA: 2, maxA: 9,  minB: 2, maxB: 9,  label: 'Medium' },      // Level 3
-    { minA: 2, maxA: 12, minB: 2, maxB: 12, label: 'Medium' },      // Level 4
-    { minA: 5, maxA: 15, minB: 2, maxB: 12, label: 'Hard' },        // Level 5
-    { minA: 10, maxA: 25, minB: 2, maxB: 15, label: 'Hard' },       // Level 6
-    { minA: 10, maxA: 50, minB: 2, maxB: 20, label: 'Expert' },     // Level 7
-    { minA: 10, maxA: 99, minB: 2, maxB: 50, label: 'Expert' },     // Level 8+
-  ];
-  return configs[Math.min(lvl - 1, configs.length - 1)];
+  return LEVEL_CONFIGS[Math.min(lvl - 1, LEVEL_CONFIGS.length - 1)];
 }
 
 function randInt(min, max) {
@@ -797,7 +982,7 @@ function generateQuestion() {
   document.getElementById('revealBtn').classList.remove('visible');
   document.getElementById('nextBtn').classList.remove('visible');
   document.getElementById('difficultyBadge').textContent =
-    `Level ${level} — ${getLevelConfig(level).label}`;
+    t('levelBadge').replace('{level}', level).replace('{label}', t(getLevelConfig(level).label.toLowerCase()));
   renderQuestion();
   document.getElementById('answerInput').focus();
 }
@@ -911,7 +1096,7 @@ function checkAnswer() {
       setTimeout(() => {
         const bonus = document.createElement('div');
         bonus.className = 'bonus-popup';
-        bonus.textContent = '🔥 10 STREAK BONUS! +10 🔥';
+        bonus.textContent = t('streakBonus');
         document.body.appendChild(bonus);
         setTimeout(() => bonus.remove(), 2500);
       }, 600);
@@ -944,18 +1129,12 @@ function checkAnswer() {
 
     if (wrongCount >= 3) {
       // After 3 wrong: show reveal button
-      feedback.textContent = '3 wrong tries — you can see the answer or keep trying!';
+      feedback.textContent = t('threeWrong');
       document.getElementById('revealBtn').classList.add('visible');
     } else {
-      const encouragements = [
-        'Almost! Try again 💪',
-        'Not quite — give it another shot!',
-        'So close! Try once more 🤔',
-        'Hmm, not that one — keep going!',
-        'Try again, you got this! 🌟',
-      ];
+      const encouragements = t('encouragements');
       feedback.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
-      feedback.textContent += ` (${3 - wrongCount} tries left)`;
+      feedback.textContent += ' ' + t('triesRemaining').replace('{n}', 3 - wrongCount);
     }
 
     input.focus();
@@ -1012,7 +1191,7 @@ function renderVisualMult(a, b, total) {
   if (total <= 50 && a <= 10 && b <= 10) {
     // Small numbers: show apple groups
     document.getElementById('visualTitle').textContent =
-      `${a} group${a>1?'s':''} of ${b} 🍎`;
+      t('groupsOf').replace('{a}', a).replace('{s}', a>1?'s':'').replace('{s_sv}', a>1?'er':'').replace('{b}', b);
     for (let g = 0; g < a; g++) {
       const div = document.createElement('div');
       div.className = 'group';
@@ -1026,7 +1205,7 @@ function renderVisualMult(a, b, total) {
   } else if (total <= 144 && a <= 12 && b <= 12) {
     // Medium numbers: show a neat grid of apples (rows × columns)
     document.getElementById('visualTitle').textContent =
-      `${a} rows × ${b} columns = ? 🍎`;
+      t('rowsCols').replace('{a}', a).replace('{b}', b);
     const grid = document.createElement('div');
     grid.className = 'apple-grid';
     grid.style.gridTemplateColumns = `repeat(${b}, 1fr)`;
@@ -1046,7 +1225,7 @@ function renderVisualMult(a, b, total) {
     const barColors = ['#e74c3c', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
 
     document.getElementById('visualTitle').textContent =
-      `Break it apart: ${a} × ${b}`;
+      t('breakApart').replace('{a}', a).replace('{b}', b);
 
     let html = '<div class="break-apart">';
     parts.forEach((p, i) => {
@@ -1063,7 +1242,7 @@ function renderVisualMult(a, b, total) {
     });
     // Hint row: updates as sub-problems are solved
     html += `<div class="break-total" id="breakTotal">
-      <span class="break-label" id="breakTotalLabel">Solve the parts above, then answer below!</span>
+      <span class="break-label" id="breakTotalLabel">${t('solvePartsHint')}</span>
     </div>`;
     html += '</div>';
     container.innerHTML = html;
@@ -1104,7 +1283,7 @@ function checkSubProblem(index) {
     void input.offsetWidth;
     input.classList.add('shake');
     input.value = '';
-    result.textContent = 'Try again!';
+    result.textContent = t('tryAgain');
     result.classList.add('visible');
     result.style.color = '#e74c3c';
     input.focus();
@@ -1128,7 +1307,7 @@ function updateBreakTotal() {
     const sumExpr = solved.join(' + ');
     label.textContent = sumExpr + ' = ?';
   } else if (solved.length > 0) {
-    label.textContent = 'Keep going — solve the remaining parts!';
+    label.textContent = t('keepGoing');
   }
 }
 
@@ -1152,7 +1331,6 @@ function buildMultWorkings(a, b) {
   const total = a * b;
   const totalStr = String(total);
   const numCols = totalStr.length;
-  const placeNames = ['ones', 'tens', 'hundreds', 'thousands', 'ten-thousands'];
 
   function makeColTable(rows) {
     let html = '<table class="col-table">';
@@ -1227,26 +1405,27 @@ function buildMultWorkings(a, b) {
     tableRows.push(numToDigitRow(total, '', 'result'));
   }
 
+  const placeNames = t('placeNames');
   let html = '<div class="mult-workings">';
-  html += '<div style="text-align:center;font-weight:bold;color:#888;margin-bottom:12px;font-size:0.95em;">Column method — aligned by place value</div>';
+  html += `<div style="text-align:center;font-weight:bold;color:#888;margin-bottom:12px;font-size:0.95em;">${t('columnMethod')}</div>`;
   html += makeColTable(tableRows);
 
   partialInfos.forEach((info, idx) => {
     const placeName = placeNames[info.shift] || `×10<sup>${info.shift}</sup>`;
     const shiftNote = info.shift > 0
-      ? ` — <span class="place-note">this is the <em>${placeName}</em> digit of ${b}, so shift result ${info.shift} place${info.shift>1?'s':''} left (add ${info.shift} zero${info.shift>1?'s':''})</span>`
+      ? ` — <span class="place-note">${t('thisIsThe')} <em>${placeName}</em>${t('digitOf')} ${b}, ${t('soShift')} ${info.shift} ${t('placeLeft').replace('{s}', info.shift>1?'s':'')} (${t('addZeros')} ${info.shift} ${info.shift>1?t('zero')+(lang==='en'?'s':'or'):t('zero')})</span>`
       : '';
-    html += `<div class="step-section"><div class="step-title">Step ${idx+1}: ${a} × ${info.bDigit}${shiftNote}</div>`;
+    html += `<div class="step-section"><div class="step-title">${t('step')} ${idx+1}: ${a} × ${info.bDigit}${shiftNote}</div>`;
     if (info.bDigit === 0) {
-      html += `<div class="digit-steps"><div class="digit-step">Anything × 0 = 0</div></div>`;
+      html += `<div class="digit-steps"><div class="digit-step">${t('anythingTimesZero')}</div></div>`;
     } else {
       html += `<div class="digit-steps">`;
       info.digitSteps.forEach(s => {
-        if (s.isFinalCarry) { html += `<div class="digit-step">  Final carry → write <strong>${s.write}</strong></div>`; return; }
+        if (s.isFinalCarry) { html += `<div class="digit-step">  ${t('finalCarry')} <strong>${s.write}</strong></div>`; return; }
         let line = `${s.aDigit} × ${s.bDigit}`;
-        if (s.carry > 0) line += ` + <span class="carry-num">${s.carry}</span> (carry)`;
+        if (s.carry > 0) line += ` + <span class="carry-num">${s.carry}</span> (${t('carry')})`;
         line += ` = ${s.prod}`;
-        if (s.newCarry > 0) line += `  →  write <strong>${s.write}</strong>, carry <span class="carry-num">${s.newCarry}</span>`;
+        if (s.newCarry > 0) line += `  →  write <strong>${s.write}</strong>, ${t('carry')} <span class="carry-num">${s.newCarry}</span>`;
         else line += `  →  write <strong>${s.write}</strong>`;
         html += `<div class="digit-step">• ${line}</div>`;
       });
@@ -1254,13 +1433,13 @@ function buildMultWorkings(a, b) {
     }
     const fullStr = String(info.fullVal);
     html += `<div class="partial-result">`;
-    if (info.shift > 0) html += `${a} × ${info.bDigit} = ${info.partialVal}, then add ${'0'.repeat(info.shift)} → <strong>${fullStr}</strong>`;
-    else html += `Result: <strong>${fullStr}</strong>`;
+    if (info.shift > 0) html += `${a} × ${info.bDigit} = ${info.partialVal}, ${t('thenAddZeros')} ${'0'.repeat(info.shift)} → <strong>${fullStr}</strong>`;
+    else html += `${t('result')}: <strong>${fullStr}</strong>`;
     html += `</div></div>`;
   });
 
   if (bStr.length > 1) {
-    html += `<div class="step-section add-section"><div class="step-title">Final step: add all partial products</div><div class="digit-steps">`;
+    html += `<div class="step-section add-section"><div class="step-title">${t('finalStep')}</div><div class="digit-steps">`;
     partialInfos.forEach(info => {
       html += `<div class="digit-step">${a} × ${info.bDigit}${'0'.repeat(info.shift)} = ${info.fullVal.toLocaleString()}</div>`;
     });
@@ -1277,16 +1456,20 @@ function renderDivision(total, divisor) {
   const quotient = Math.floor(total / divisor);
   const remainder = total % divisor;
   document.getElementById('equation').textContent =
-    `${total} ÷ ${divisor} = ?` + (remainder ? ' (just the quotient)' : '');
+    `${total} ÷ ${divisor} = ?` + (remainder ? ' ' + t('justQuotient') : '');
   document.getElementById('answerBox').textContent =
-    `= ${quotient}` + (remainder ? ` remainder ${remainder}` : '');
+    `= ${quotient}` + (remainder ? ` ${t('remainder')} ${remainder}` : '');
 
   const container = document.getElementById('groupsContainer');
   container.innerHTML = '';
   const showPiles = Math.min(quotient, 12);
-  document.getElementById('visualTitle').textContent =
-    `${total} 🍎 shared into groups of ${divisor} → ${quotient} group${quotient!==1?'s':''}` +
-    (remainder ? ` + ${remainder} left over` : '');
+  const pluralS = quotient !== 1 ? 's' : '';
+  const pluralSv = quotient !== 1 ? 'er' : '';
+  let vizTitle = t('sharedIntoGroups')
+    .replace('{total}', total).replace('{divisor}', divisor)
+    .replace('{quotient}', quotient).replace('{s}', pluralS).replace('{s_sv}', pluralSv);
+  if (remainder) vizTitle += t('plusLeftover').replace('{n}', remainder);
+  document.getElementById('visualTitle').textContent = vizTitle;
 
   if (quotient <= 60 && divisor <= 20 && total <= 200) {
     for (let g = 0; g < showPiles; g++) {
@@ -1302,7 +1485,8 @@ function renderDivision(total, divisor) {
     if (quotient > showPiles) {
       const more = document.createElement('div');
       more.className = 'too-many';
-      more.textContent = `… and ${quotient - showPiles} more group${quotient-showPiles>1?'s':''}`;
+      const n = quotient - showPiles;
+      more.textContent = t('moreGroups').replace('{n}', n).replace('{s}', n>1?'s':'').replace('{s_sv}', n>1?'er':'');
       container.appendChild(more);
     }
     if (remainder > 0) {
@@ -1316,18 +1500,36 @@ function renderDivision(total, divisor) {
       }
       const lbl = document.createElement('div');
       lbl.style.cssText = 'font-size:0.65em;color:#f39c12;width:100%;text-align:center;margin-top:2px;font-weight:bold';
-      lbl.textContent = 'leftover';
+      lbl.textContent = t('leftover');
       rem.appendChild(lbl);
       container.appendChild(rem);
     }
   } else {
-    container.innerHTML = `<div class="too-many">Too many to show visually — see the workings below 🤓</div>`;
+    container.innerHTML = `<div class="too-many">${t('tooMany')}</div>`;
   }
 
   document.getElementById('workings').innerHTML = buildDivWorkings(total, divisor);
 }
 
 function buildDivWorkings(dividend, divisor) {
+  const quotient = Math.floor(dividend / divisor);
+  const remainder = dividend % divisor;
+  const remNote = remainder > 0 ? `  ${t('remainder')} ${remainder}` : '';
+
+  // Simple case: single-step division (dividend < 100 or only one meaningful step)
+  if (String(dividend).length <= String(divisor).length + 1 && dividend < 100) {
+    let html = '<div class="div-workings">';
+    html += `<span class="step">  ${dividend} ÷ ${divisor} = ${quotient}`;
+    html += `   (${t('because')} ${quotient} × ${divisor} = ${quotient * divisor})</span>\n`;
+    if (remainder > 0) {
+      html += `<span class="step">  ${dividend} − ${quotient * divisor} = ${remainder} ${t('leftOverText')}</span>\n`;
+    }
+    html += `\n<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${quotient}</strong>${remNote}</span>`;
+    html += '</div>';
+    return html;
+  }
+
+  // Full long division for larger numbers
   const dividendStr = String(dividend);
   let current = 0;
   let quotientStr = '';
@@ -1351,16 +1553,16 @@ function buildDivWorkings(dividend, divisor) {
     const s = steps[i];
     const indent = '       ' + ' '.repeat(i * 2);
     if (s.current < divisor && s.q === 0 && i < steps.length - 1) {
-      lines.push(`<span class="step">${indent}${s.current}  (less than ${divisor}, write 0, bring down next digit)</span>`);
+      lines.push(`<span class="step">${indent}${s.current}  ${t('lessThan').replace('{divisor}', divisor)}</span>`);
     } else {
-      lines.push(`<span class="step">${indent}${s.current}  ÷  ${divisor}  =  ${s.q}   (since ${s.q} × ${divisor} = ${s.subtract})</span>`);
+      lines.push(`<span class="step">${indent}${s.current}  ÷  ${divisor}  =  ${s.q}   (${t('since')} ${s.q} × ${divisor} = ${s.subtract})</span>`);
       lines.push(`<span class="step">${indent}${s.current} − ${s.subtract} = ${s.rem}</span>`);
     }
   }
   lines.push('');
   lines.push(`<span class="line-sep">  ${sep}</span>`);
-  const remNote = finalRem > 0 ? `  remainder ${finalRem}` : '';
-  lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${remNote}</span>`);
+  const finalRemNote = finalRem > 0 ? `  ${t('remainder')} ${finalRem}` : '';
+  lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${finalRemNote}</span>`);
   return `<div class="div-workings">${lines.join('\n')}</div>`;
 }
 
@@ -1384,7 +1586,7 @@ function launchCelebration() {
 
   const text = document.createElement('div');
   text.className = 'celebration-text';
-  text.textContent = '⭐ CORRECT! ⭐';
+  text.textContent = t('correct');
   document.body.appendChild(text);
   setTimeout(() => text.remove(), 1500);
 
