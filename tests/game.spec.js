@@ -9,9 +9,9 @@ test('page loads with start screen', async ({ page }) => {
   await expect(page.locator('.start-card h2')).toContainText("Gabriel's Math Game");
 });
 
-test('start screen shows 8 level buttons', async ({ page }) => {
+test('start screen shows 12 level buttons', async ({ page }) => {
   const buttons = page.locator('.level-pick-btn');
-  await expect(buttons).toHaveCount(8);
+  await expect(buttons).toHaveCount(12);
 });
 
 test('clicking Start Game hides start screen and shows game', async ({ page }) => {

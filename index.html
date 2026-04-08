@@ -112,28 +112,35 @@ h1 {
 .method-picker {
   display: flex;
   justify-content: center;
-  gap: 6px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
+  position: relative;
+  border-bottom: 2px solid #ddd;
 }
 .method-picker .method-btn {
-  padding: 6px 16px;
-  border-radius: 20px;
-  border: 2px solid #ddd;
-  background: #f5f5f5;
-  font-size: 0.85em;
+  padding: 10px 20px;
+  border-radius: 10px 10px 0 0;
+  border: 2px solid transparent;
+  border-bottom: 2px solid #ddd;
+  background: #f0f0f0;
+  font-size: 0.9em;
   font-weight: bold;
   cursor: pointer;
-  color: #777;
+  color: #999;
   transition: all 0.2s;
+  margin-bottom: -2px;
 }
 .method-picker .method-btn.active {
-  background: #3498db;
-  color: white;
-  border-color: #3498db;
+  background: white;
+  color: #333;
+  border-color: #ddd;
+  border-bottom-color: white;
 }
 .method-picker .method-btn:hover:not(.active) {
-  border-color: #aaa;
-  background: #eee;
+  background: #e8e8e8;
+  color: #666;
+}
+.method-tab-content {
+  padding-top: 16px;
 }
 .visual-title {
   font-size: 0.9em;
@@ -242,10 +249,10 @@ h1 {
 
 /* Interactive column table digit inputs */
 .digit-input {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   text-align: center;
-  font-size: 1.15em;
+  font-size: 1.2em;
   font-weight: bold;
   font-family: 'Courier New', monospace;
   border: 2px solid #bdc3c7;
@@ -256,6 +263,15 @@ h1 {
   background: #fff;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   -moz-appearance: textfield;
+}
+/* Pulsing glow on the next input to fill */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(52,152,219,0.25); }
+  50% { box-shadow: 0 0 0 5px rgba(52,152,219,0.45); }
+}
+.digit-input.next-focus:not(.correct) {
+  border-color: #3498db;
+  animation: pulseGlow 1.2s ease-in-out infinite;
 }
 .digit-input::-webkit-inner-spin-button,
 .digit-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -285,6 +301,13 @@ h1 {
 .working-total .step-title { color: #27ae60; }
 .col-table .hidden-row td { visibility: hidden; }
 .col-table .revealed-row td { visibility: visible; }
+.carry-val { opacity: 0; transition: opacity 0.3s ease; display: inline-block; }
+.carry-val.visible { opacity: 1; animation: carryPop 0.35s ease; }
+@keyframes carryPop {
+  0% { opacity: 0; transform: translateY(4px) scale(0.7); }
+  60% { transform: translateY(-2px) scale(1.1); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 .row-complete td .digit-input { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
 /* Color-coded multiplier digit badges */
 .digit-badge {
@@ -301,8 +324,8 @@ h1 {
 /* Partial row color indicator dot */
 .partial-dot {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   margin-right: 4px;
   vertical-align: middle;
@@ -548,19 +571,19 @@ h1 {
   font-size: 1.25em;
 }
 .col-table td {
-  width: 32px; height: 32px;
+  width: 38px; height: 38px;
   text-align: center; vertical-align: middle; padding: 0;
 }
 .col-table td.op-cell {
-  width: 36px; color: #888; font-weight: bold;
+  width: 44px; color: #888; font-weight: bold;
   text-align: right; padding-right: 6px;
 }
-.col-table .carry-row td { height: 20px; font-size: 0.65em; color: #e67e22; font-weight: bold; vertical-align: bottom; }
+.col-table .carry-row td { height: 22px; font-size: 0.75em; color: #e67e22; font-weight: bold; vertical-align: bottom; }
 .col-table .sep-row td { border-top: 3px solid #555; height: 6px; }
 .col-table .sep-row td.op-cell { border-top: none; }
 .col-table .result-row td { color: #27ae60; font-weight: bold; }
-.col-table .partial-row td { color: #2980b9; }
-.col-table td.dim { color: #ccc; }
+.col-table .partial-row td { }
+.col-table td.dim { color: #bbb; }
 
 .step-section {
   background: #f8f8ff; border-left: 4px solid #e74c3c;
@@ -769,6 +792,26 @@ h1 {
         <span class="lvl-label">Expert</span>
         <span class="lvl-range">10–99 × 2–50</span>
       </button>
+      <button class="level-pick-btn" onclick="pickLevel(9, this)">
+        <span class="lvl-num">9</span>
+        <span class="lvl-label">Master</span>
+        <span class="lvl-range">100–250 × 10–50</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(10, this)">
+        <span class="lvl-num">10</span>
+        <span class="lvl-label">Master</span>
+        <span class="lvl-range">100–500 × 10–99</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(11, this)">
+        <span class="lvl-num">11</span>
+        <span class="lvl-label">Champion</span>
+        <span class="lvl-range">500–2000 × 20–99</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(12, this)">
+        <span class="lvl-num">12</span>
+        <span class="lvl-label">Champion</span>
+        <span class="lvl-range">1000–9999 × 20–999</span>
+      </button>
     </div>
     <button class="start-game-btn" id="startGameBtn" onclick="startGame()">Start Game! 🚀</button>
   </div>
@@ -811,14 +854,14 @@ h1 {
 
   <div class="visual-area" id="visualArea">
     <div class="method-picker" id="methodPicker" style="display:none">
-      <button class="method-btn active" id="methodBreakBtn" onclick="setMethod('break')" data-t="methodBreakApart">Break apart 🧩</button>
-      <button class="method-btn" id="methodColBtn" onclick="setMethod('column')" data-t="methodColumn">Column method 📝</button>
+      <button class="method-btn active" id="methodBreakBtn" onclick="setMethod('break')" data-t="methodBreakApart">🧩 Break apart</button>
+      <button class="method-btn" id="methodColBtn" onclick="setMethod('column')" data-t="methodColumn">📝 Column method</button>
     </div>
-    <div id="methodBreakContent">
+    <div id="methodBreakContent" class="method-tab-content">
       <div class="visual-title" id="visualTitle"></div>
       <div class="groups-container" id="groupsContainer"></div>
     </div>
-    <div id="methodColumnContent" style="display:none">
+    <div id="methodColumnContent" class="method-tab-content" style="display:none">
       <div id="workings"></div>
     </div>
   </div>
@@ -859,7 +902,7 @@ const TRANSLATIONS = {
     chooseLevel: "Choose your starting level",
     startGame: "Start Game! 🚀",
     // Level labels
-    easy: "Easy", medium: "Medium", hard: "Hard", expert: "Expert",
+    easy: "Easy", medium: "Medium", hard: "Hard", expert: "Expert", master: "Master", champion: "Champion",
     // Score bar
     score: "Score", streak: "Streak", level: "Level", triesLeft: "Tries left",
     // Mode buttons
@@ -929,14 +972,14 @@ const TRANSLATIONS = {
     addPartials: "Now add them up:",
     allStepsSolved: "All steps solved! Now answer the question above.",
     // Method picker
-    methodBreakApart: "Break apart 🧩",
-    methodColumn: "Column method 📝",
+    methodBreakApart: "🧩 Break apart",
+    methodColumn: "📝 Column method",
   },
   sv: {
     title: "🍎 Gabriels Mattespel",
     chooseLevel: "Välj startnivå",
     startGame: "Starta spelet! 🚀",
-    easy: "Lätt", medium: "Medel", hard: "Svår", expert: "Expert",
+    easy: "Lätt", medium: "Medel", hard: "Svår", expert: "Expert", master: "Mästare", champion: "Mästare+",
     score: "Poäng", streak: "Svit", level: "Nivå", triesLeft: "Försök kvar",
     both: "Båda", multOnly: "✖ Bara", divOnly: "➗ Bara",
     check: "Kolla! ✓",
@@ -993,8 +1036,8 @@ const TRANSLATIONS = {
     hideHowItWorks: "Dölj ▴",
     addPartials: "Lägg nu ihop dem:",
     allStepsSolved: "Alla steg lösta! Svara nu på frågan ovan.",
-    methodBreakApart: "Dela upp 🧩",
-    methodColumn: "Kolumnmetoden 📝",
+    methodBreakApart: "🧩 Dela upp",
+    methodColumn: "📝 Kolumnmetoden",
   }
 };
 
@@ -1039,7 +1082,7 @@ function applyTranslations() {
   document.getElementById('startSubtitle').textContent = t('chooseLevel');
   document.getElementById('startGameBtn').textContent = t('startGame');
   // Level picker labels
-  const levelLabels = ['easy','easy','medium','medium','hard','hard','expert','expert'];
+  const levelLabels = ['easy','easy','medium','medium','hard','hard','expert','expert','master','master','champion','champion'];
   document.querySelectorAll('.level-pick-btn .lvl-label').forEach((el, i) => {
     el.textContent = t(levelLabels[i]);
   });
@@ -1074,6 +1117,10 @@ const LEVEL_CONFIGS = [
   { minA: 10, maxA: 25, minB: 2, maxB: 15, label: 'Hard' },
   { minA: 10, maxA: 50, minB: 2, maxB: 20, label: 'Expert' },
   { minA: 10, maxA: 99, minB: 2, maxB: 50, label: 'Expert' },
+  { minA: 100, maxA: 250, minB: 10, maxB: 50, label: 'Master' },
+  { minA: 100, maxA: 500, minB: 10, maxB: 99, label: 'Master' },
+  { minA: 500, maxA: 2000, minB: 20, maxB: 99, label: 'Champion' },
+  { minA: 1000, maxA: 9999, minB: 20, maxB: 999, label: 'Champion' },
 ];
 
 function getLevelConfig(lvl) {
@@ -1163,7 +1210,7 @@ function updateWrongDots() {
 
 function calculateLevel() {
   // Level up every 5 correct answers, but never below starting level
-  const newLevel = Math.min(Math.max(Math.floor(questionsAnswered / 5) + startingLevel, startingLevel), 8);
+  const newLevel = Math.min(Math.max(Math.floor(questionsAnswered / 5) + startingLevel, startingLevel), LEVEL_CONFIGS.length);
   if (newLevel !== level) {
     level = newLevel;
     updateLevel();
@@ -1504,11 +1551,16 @@ function buildMultWorkings(a, b) {
         html += '</tr>'; return;
       }
       if (row.type === 'carry') {
-        const hideClass = interactive ? ' hidden-row' : '';
-        html += `<tr class="carry-row${hideClass}" id="workingCarry${partialIdx}"><td class="op-cell"></td>`;
+        const bgColor = interactive && partialIdx < partialColors.length ? partialColors[partialIdx] : '';
+        const bgStyle = bgColor ? ` style="background:${bgColor}0D"` : '';
+        html += `<tr class="carry-row" id="workingCarry${partialIdx}"${bgStyle}><td class="op-cell"></td>`;
         for (let c = 0; c < numCols; c++) {
           const v = row.digits[c];
-          html += `<td>${v != null && v !== 0 ? v : ''}</td>`;
+          if (interactive && v != null && v !== 0) {
+            html += `<td><span class="carry-val" id="carry_${partialIdx}_${c}">${v}</span></td>`;
+          } else {
+            html += `<td>${v != null && v !== 0 ? v : ''}</td>`;
+          }
         }
         html += '</tr>'; return;
       }
@@ -1542,13 +1594,14 @@ function buildMultWorkings(a, b) {
         const opContent = isPartial
           ? `<span class="partial-dot" style="background:${color}"></span>${row.op || ''}`
           : (row.op || '');
-        html += `<tr class="${cls}" id="${trId}"><td class="op-cell">${opContent}</td>`;
+        const rowBg = isPartial ? ` style="background:${color}12"` : '';
+        html += `<tr class="${cls}" id="${trId}"${rowBg}><td class="op-cell">${opContent}</td>`;
         for (let c = 0; c < numCols; c++) {
           const v = row.digits[c];
           if (v == null) {
             html += '<td class="dim">·</td>';
           } else {
-            html += `<td class="input-cell"><input class="digit-input" type="text" inputmode="numeric" maxlength="1" data-answer="${v}" data-row="${rowName}" autocomplete="off"${disabled}></td>`;
+            html += `<td class="input-cell"><input class="digit-input" type="text" inputmode="numeric" maxlength="1" data-answer="${v}" data-row="${rowName}" data-col="${c}" autocomplete="off"${disabled}></td>`;
           }
         }
         html += '</tr>';
@@ -1682,10 +1735,42 @@ function buildMultWorkings(a, b) {
           }
         });
       });
+      // Set initial focus + pulsing glow on the first input to fill
+      updateNextFocus();
     }, 0);
   }
 
   return html;
+}
+
+function updateNextFocus() {
+  // Remove pulsing glow from all inputs
+  document.querySelectorAll('.digit-input.next-focus').forEach(i => i.classList.remove('next-focus'));
+  // Find the first enabled, non-readonly, non-correct input in partial rows (top to bottom, right to left)
+  const partialRows = document.querySelectorAll('tr[id^="workingPartial"]');
+  for (const row of partialRows) {
+    const inputs = Array.from(row.querySelectorAll('.digit-input'));
+    // Right-to-left: find rightmost unfilled
+    for (let i = inputs.length - 1; i >= 0; i--) {
+      if (!inputs[i].readOnly && !inputs[i].disabled && !inputs[i].classList.contains('correct')) {
+        inputs[i].classList.add('next-focus');
+        inputs[i].focus();
+        return;
+      }
+    }
+  }
+  // If all partials done, focus first result input
+  const resultRow = document.getElementById('workingResultRow');
+  if (resultRow) {
+    const inputs = Array.from(resultRow.querySelectorAll('.digit-input'));
+    for (let i = inputs.length - 1; i >= 0; i--) {
+      if (!inputs[i].readOnly && !inputs[i].disabled && !inputs[i].classList.contains('correct')) {
+        inputs[i].classList.add('next-focus');
+        inputs[i].focus();
+        return;
+      }
+    }
+  }
 }
 
 function checkDigit(el) {
@@ -1697,12 +1782,13 @@ function checkDigit(el) {
     el.classList.remove('wrong');
     el.classList.add('correct');
     el.readOnly = true;
-    // Reveal carry row immediately on first correct digit (so user sees carry for next column)
+    // Reveal the carry for the column to the LEFT of the just-entered digit
     const rowName = el.dataset.row;
     if (rowName && rowName.startsWith('partial')) {
       const idx = parseInt(rowName.replace('partial', ''));
-      const carry = document.getElementById('workingCarry' + idx);
-      if (carry) { carry.classList.remove('hidden-row'); carry.classList.add('revealed-row'); }
+      const col = parseInt(el.dataset.col);
+      const carryCell = document.getElementById('carry_' + idx + '_' + (col - 1));
+      if (carryCell) carryCell.classList.add('visible');
     }
     // Auto-advance: prefer left (like on paper), then right
     const tr = el.closest('tr');
@@ -1725,13 +1811,14 @@ function checkDigit(el) {
       const allCorrect = allInRow.every(inp => inp.classList.contains('correct'));
       if (allCorrect) onRowComplete(rowName);
     }
+    updateNextFocus();
   } else {
     el.classList.remove('correct');
     el.classList.add('wrong');
     el.classList.remove('shake');
     void el.offsetWidth;
     el.classList.add('shake');
-    setTimeout(() => { el.value = ''; el.classList.remove('wrong'); }, 400);
+    setTimeout(() => { el.value = ''; el.classList.remove('wrong'); }, 600);
   }
 }
 
@@ -1768,9 +1855,8 @@ function onRowComplete(rowName) {
         document.getElementById('workingFinalLabel').textContent =
           solved.join(' + ') + ' = ?';
       }
-      // Focus first result input
-      const first = document.querySelector('.digit-input[data-row="result"]:not([readonly])');
-      if (first) first.focus();
+      // Focus first result input (right to left)
+      updateNextFocus();
     }
   } else if (rowName === 'result') {
     const row = document.getElementById('workingResultRow');
