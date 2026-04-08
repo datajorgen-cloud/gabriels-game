@@ -108,6 +108,40 @@ h1 {
   margin-bottom: 20px;
   border: 2px dashed #f0c080;
 }
+/* Method picker (break-apart vs column) */
+.method-picker {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0;
+  position: relative;
+  border-bottom: 2px solid #ddd;
+}
+.method-picker .method-btn {
+  padding: 10px 20px;
+  border-radius: 10px 10px 0 0;
+  border: 2px solid transparent;
+  border-bottom: 2px solid #ddd;
+  background: #f0f0f0;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+  color: #999;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+.method-picker .method-btn.active {
+  background: white;
+  color: #333;
+  border-color: #ddd;
+  border-bottom-color: white;
+}
+.method-picker .method-btn:hover:not(.active) {
+  background: #e8e8e8;
+  color: #666;
+}
+.method-tab-content {
+  padding-top: 16px;
+}
 .visual-title {
   font-size: 0.9em;
   color: #888;
@@ -212,6 +246,92 @@ h1 {
   margin-top: 4px;
 }
 .break-total .break-label { color: #27ae60; font-size: 1em; }
+
+/* Interactive column table digit inputs */
+.digit-input {
+  width: 36px;
+  height: 36px;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  border: 2px solid #bdc3c7;
+  border-radius: 6px;
+  outline: none;
+  padding: 0;
+  color: #2c3e50;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -moz-appearance: textfield;
+}
+/* Pulsing glow on the next input to fill */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(52,152,219,0.25); }
+  50% { box-shadow: 0 0 0 5px rgba(52,152,219,0.45); }
+}
+.digit-input.next-focus:not(.correct) {
+  border-color: #3498db;
+  animation: pulseGlow 1.2s ease-in-out infinite;
+}
+.digit-input::-webkit-inner-spin-button,
+.digit-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.digit-input:focus { border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
+.digit-input.correct { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+.digit-input.wrong { border-color: #e74c3c; background: #fdf0ef; }
+.digit-input:disabled { background: #f0f0f0; border-color: #ddd; color: #bbb; cursor: not-allowed; }
+.col-table td.input-cell { padding: 2px; }
+.working-detail-toggle {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-size: 0.85em;
+  padding: 2px 0;
+  margin-top: 4px;
+  font-weight: bold;
+}
+.working-detail-toggle:hover { color: #2980b9; text-decoration: underline; }
+.working-detail { display: none; margin-top: 6px; }
+.working-detail.visible { display: block; }
+.working-total {
+  border-top: 2px dashed #ccc;
+  padding-top: 10px;
+  margin-top: 8px;
+}
+.working-total .step-title { color: #27ae60; }
+.col-table .hidden-row td { visibility: hidden; }
+.col-table .revealed-row td { visibility: visible; }
+.carry-val { opacity: 0; transition: opacity 0.3s ease; display: inline-block; }
+.carry-val.visible { opacity: 1; animation: carryPop 0.35s ease; }
+@keyframes carryPop {
+  0% { opacity: 0; transform: translateY(4px) scale(0.7); }
+  60% { transform: translateY(-2px) scale(1.1); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.row-complete td .digit-input { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+/* Color-coded multiplier digit badges */
+.digit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: bold;
+  color: white;
+  font-size: 1em;
+}
+/* Partial row color indicator dot */
+.partial-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+/* Step section colored left border inherits from partial color */
+.step-section[data-color] { border-left-width: 5px; }
 
 /* Apple grid for medium numbers */
 .apple-grid {
@@ -451,19 +571,19 @@ h1 {
   font-size: 1.25em;
 }
 .col-table td {
-  width: 32px; height: 32px;
+  width: 38px; height: 38px;
   text-align: center; vertical-align: middle; padding: 0;
 }
 .col-table td.op-cell {
-  width: 36px; color: #888; font-weight: bold;
+  width: 44px; color: #888; font-weight: bold;
   text-align: right; padding-right: 6px;
 }
-.col-table .carry-row td { height: 20px; font-size: 0.65em; color: #e67e22; font-weight: bold; vertical-align: bottom; }
+.col-table .carry-row td { height: 22px; font-size: 0.75em; color: #e67e22; font-weight: bold; vertical-align: bottom; }
 .col-table .sep-row td { border-top: 3px solid #555; height: 6px; }
 .col-table .sep-row td.op-cell { border-top: none; }
 .col-table .result-row td { color: #27ae60; font-weight: bold; }
-.col-table .partial-row td { color: #2980b9; }
-.col-table td.dim { color: #ccc; }
+.col-table .partial-row td { }
+.col-table td.dim { color: #bbb; }
 
 .step-section {
   background: #f8f8ff; border-left: 4px solid #e74c3c;
@@ -672,6 +792,26 @@ h1 {
         <span class="lvl-label">Expert</span>
         <span class="lvl-range">10–99 × 2–50</span>
       </button>
+      <button class="level-pick-btn" onclick="pickLevel(9, this)">
+        <span class="lvl-num">9</span>
+        <span class="lvl-label">Master</span>
+        <span class="lvl-range">100–250 × 10–50</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(10, this)">
+        <span class="lvl-num">10</span>
+        <span class="lvl-label">Master</span>
+        <span class="lvl-range">100–500 × 10–99</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(11, this)">
+        <span class="lvl-num">11</span>
+        <span class="lvl-label">Champion</span>
+        <span class="lvl-range">500–2000 × 20–99</span>
+      </button>
+      <button class="level-pick-btn" onclick="pickLevel(12, this)">
+        <span class="lvl-num">12</span>
+        <span class="lvl-label">Champion</span>
+        <span class="lvl-range">1000–9999 × 20–999</span>
+      </button>
     </div>
     <button class="start-game-btn" id="startGameBtn" onclick="startGame()">Start Game! 🚀</button>
   </div>
@@ -713,8 +853,17 @@ h1 {
   <div class="difficulty-badge" id="difficultyBadge"></div>
 
   <div class="visual-area" id="visualArea">
-    <div class="visual-title" id="visualTitle"></div>
-    <div class="groups-container" id="groupsContainer"></div>
+    <div class="method-picker" id="methodPicker" style="display:none">
+      <button class="method-btn active" id="methodBreakBtn" onclick="setMethod('break')" data-t="methodBreakApart">🧩 Break apart</button>
+      <button class="method-btn" id="methodColBtn" onclick="setMethod('column')" data-t="methodColumn">📝 Column method</button>
+    </div>
+    <div id="methodBreakContent" class="method-tab-content">
+      <div class="visual-title" id="visualTitle"></div>
+      <div class="groups-container" id="groupsContainer"></div>
+    </div>
+    <div id="methodColumnContent" class="method-tab-content" style="display:none">
+      <div id="workings"></div>
+    </div>
   </div>
 
   <div class="answer-area">
@@ -730,13 +879,13 @@ h1 {
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="divWorkingsCard" style="display:none">
   <label class="steps-toggle">
     <input type="checkbox" id="stepsToggle" onchange="toggleSteps()">
     <span id="labelWorkings">Show step-by-step hand workings</span>
   </label>
   <div class="steps-area" id="stepsArea">
-    <div id="workings"></div>
+    <div id="divWorkings"></div>
   </div>
 </div>
 
@@ -753,7 +902,7 @@ const TRANSLATIONS = {
     chooseLevel: "Choose your starting level",
     startGame: "Start Game! 🚀",
     // Level labels
-    easy: "Easy", medium: "Medium", hard: "Hard", expert: "Expert",
+    easy: "Easy", medium: "Medium", hard: "Hard", expert: "Expert", master: "Master", champion: "Champion",
     // Score bar
     score: "Score", streak: "Streak", level: "Level", triesLeft: "Tries left",
     // Mode buttons
@@ -817,12 +966,20 @@ const TRANSLATIONS = {
     placeLeft: "place{s} left",
     addZeros: "add",
     zero: "zero",
+    // Interactive workings
+    showHowItWorks: "See how ▾",
+    hideHowItWorks: "Hide ▴",
+    addPartials: "Now add them up:",
+    allStepsSolved: "All steps solved! Now answer the question above.",
+    // Method picker
+    methodBreakApart: "🧩 Break apart",
+    methodColumn: "📝 Column method",
   },
   sv: {
     title: "🍎 Gabriels Mattespel",
     chooseLevel: "Välj startnivå",
     startGame: "Starta spelet! 🚀",
-    easy: "Lätt", medium: "Medel", hard: "Svår", expert: "Expert",
+    easy: "Lätt", medium: "Medel", hard: "Svår", expert: "Expert", master: "Mästare", champion: "Mästare+",
     score: "Poäng", streak: "Svit", level: "Nivå", triesLeft: "Försök kvar",
     both: "Båda", multOnly: "✖ Bara", divOnly: "➗ Bara",
     check: "Kolla! ✓",
@@ -875,6 +1032,12 @@ const TRANSLATIONS = {
     placeLeft: "steg åt vänster",
     addZeros: "lägg till",
     zero: "nolla",
+    showHowItWorks: "Visa hur ▾",
+    hideHowItWorks: "Dölj ▴",
+    addPartials: "Lägg nu ihop dem:",
+    allStepsSolved: "Alla steg lösta! Svara nu på frågan ovan.",
+    methodBreakApart: "🧩 Dela upp",
+    methodColumn: "📝 Kolumnmetoden",
   }
 };
 
@@ -894,6 +1057,16 @@ let bestStreak = 0;
 let startingLevel = 1;
 let currentA = 0;
 let currentB = 0;
+let helpMethod = 'break'; // 'break' or 'column'
+
+/* ───────── HELP METHOD PICKER ───────── */
+function setMethod(method) {
+  helpMethod = method;
+  document.getElementById('methodBreakBtn').classList.toggle('active', method === 'break');
+  document.getElementById('methodColBtn').classList.toggle('active', method === 'column');
+  document.getElementById('methodBreakContent').style.display = method === 'break' ? '' : 'none';
+  document.getElementById('methodColumnContent').style.display = method === 'column' ? '' : 'none';
+}
 
 /* ───────── LANGUAGE ───────── */
 function setLang(l) {
@@ -909,7 +1082,7 @@ function applyTranslations() {
   document.getElementById('startSubtitle').textContent = t('chooseLevel');
   document.getElementById('startGameBtn').textContent = t('startGame');
   // Level picker labels
-  const levelLabels = ['easy','easy','medium','medium','hard','hard','expert','expert'];
+  const levelLabels = ['easy','easy','medium','medium','hard','hard','expert','expert','master','master','champion','champion'];
   document.querySelectorAll('.level-pick-btn .lvl-label').forEach((el, i) => {
     el.textContent = t(levelLabels[i]);
   });
@@ -926,6 +1099,8 @@ function applyTranslations() {
   document.getElementById('revealBtn').textContent = t('showAnswer');
   document.getElementById('nextBtn').textContent = t('nextQuestion');
   document.getElementById('labelWorkings').textContent = t('showWorkings');
+  document.getElementById('methodBreakBtn').textContent = t('methodBreakApart');
+  document.getElementById('methodColBtn').textContent = t('methodColumn');
   document.getElementById('labelBestStreak').textContent = t('bestStreak');
   document.getElementById('labelInARow').textContent = t('inARow');
   // Update page title
@@ -942,6 +1117,10 @@ const LEVEL_CONFIGS = [
   { minA: 10, maxA: 25, minB: 2, maxB: 15, label: 'Hard' },
   { minA: 10, maxA: 50, minB: 2, maxB: 20, label: 'Expert' },
   { minA: 10, maxA: 99, minB: 2, maxB: 50, label: 'Expert' },
+  { minA: 100, maxA: 250, minB: 10, maxB: 50, label: 'Master' },
+  { minA: 100, maxA: 500, minB: 10, maxB: 99, label: 'Master' },
+  { minA: 500, maxA: 2000, minB: 20, maxB: 99, label: 'Champion' },
+  { minA: 1000, maxA: 9999, minB: 20, maxB: 999, label: 'Champion' },
 ];
 
 function getLevelConfig(lvl) {
@@ -1031,7 +1210,7 @@ function updateWrongDots() {
 
 function calculateLevel() {
   // Level up every 5 correct answers, but never below starting level
-  const newLevel = Math.min(Math.max(Math.floor(questionsAnswered / 5) + startingLevel, startingLevel), 8);
+  const newLevel = Math.min(Math.max(Math.floor(questionsAnswered / 5) + startingLevel, startingLevel), LEVEL_CONFIGS.length);
   if (newLevel !== level) {
     level = newLevel;
     updateLevel();
@@ -1180,8 +1359,28 @@ function renderMultiplication(a, b) {
   const total = a * b;
   document.getElementById('equation').textContent = `${a} × ${b} = ?`;
   document.getElementById('answerBox').textContent = `= ${total.toLocaleString()}`;
+
+  // Show method picker only for large numbers (where break-apart is used)
+  const isLarge = !(total <= 50 && a <= 10 && b <= 10) && !(total <= 144 && a <= 12 && b <= 12);
+  const picker = document.getElementById('methodPicker');
+  picker.style.display = isLarge ? '' : 'none';
+
+  // Hide division workings card
+  document.getElementById('divWorkingsCard').style.display = 'none';
+
+  // Always render visual (break-apart / apples)
   renderVisualMult(a, b, total);
-  document.getElementById('workings').innerHTML = buildMultWorkings(a, b);
+
+  if (isLarge) {
+    // Render column method content
+    document.getElementById('workings').innerHTML = buildMultWorkings(a, b);
+    // Restore method selection
+    setMethod(helpMethod);
+  } else {
+    // Small/medium: just show the visual, hide column content
+    document.getElementById('methodBreakContent').style.display = '';
+    document.getElementById('methodColumnContent').style.display = 'none';
+  }
 }
 
 function renderVisualMult(a, b, total) {
@@ -1331,30 +1530,90 @@ function buildMultWorkings(a, b) {
   const total = a * b;
   const totalStr = String(total);
   const numCols = totalStr.length;
+  const isMultiDigit = bStr.length > 1;
 
-  function makeColTable(rows) {
+  // Colors for linking multiplier digits to their partial product rows
+  const partialColors = ['#e74c3c', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
+  // Map: for each partialIdx, which column in the multiplier row does it correspond to?
+  // partialIdx 0 → rightmost digit of b → column numCols-1
+  // partialIdx 1 → second from right → column numCols-2, etc.
+  function bDigitCol(pIdx) { return numCols - 1 - pIdx; }
+
+  function makeColTable(rows, interactive) {
     let html = '<table class="col-table">';
+    let partialIdx = 0;
     rows.forEach(row => {
       if (row.type === 'sep') {
-        html += `<tr class="sep-row"><td class="op-cell"></td>`;
+        const id = row.sepId || '';
+        const hideClass = interactive && id ? ' hidden-row' : '';
+        html += `<tr class="sep-row${hideClass}" ${id ? 'id="'+id+'"' : ''}><td class="op-cell"></td>`;
         for (let c = 0; c < numCols; c++) html += '<td></td>';
         html += '</tr>'; return;
       }
       if (row.type === 'carry') {
-        html += `<tr class="carry-row"><td class="op-cell"></td>`;
+        const bgColor = interactive && partialIdx < partialColors.length ? partialColors[partialIdx] : '';
+        const bgStyle = bgColor ? ` style="background:${bgColor}0D"` : '';
+        html += `<tr class="carry-row" id="workingCarry${partialIdx}"${bgStyle}><td class="op-cell"></td>`;
         for (let c = 0; c < numCols; c++) {
           const v = row.digits[c];
-          html += `<td>${v != null && v !== 0 ? v : ''}</td>`;
+          if (interactive && v != null && v !== 0) {
+            html += `<td><span class="carry-val" id="carry_${partialIdx}_${c}">${v}</span></td>`;
+          } else {
+            html += `<td>${v != null && v !== 0 ? v : ''}</td>`;
+          }
         }
         html += '</tr>'; return;
       }
-      const cls = row.type === 'result' ? 'result-row' : row.type === 'partial' ? 'partial-row' : '';
-      html += `<tr class="${cls}"><td class="op-cell">${row.op || ''}</td>`;
-      for (let c = 0; c < numCols; c++) {
-        const v = row.digits[c];
-        html += `<td class="${v == null ? 'dim' : ''}">${v != null ? v : '·'}</td>`;
+      const isPartial = row.type === 'partial';
+      const isResult = row.type === 'result';
+      const isMultiplier = row.type === 'number' && row.op === '×';
+
+      if (interactive && isMultiplier) {
+        // Multiplier row: color-code each digit with a badge
+        html += `<tr><td class="op-cell">${row.op}</td>`;
+        for (let c = 0; c < numCols; c++) {
+          const v = row.digits[c];
+          if (v == null) {
+            html += '<td class="dim">·</td>';
+          } else {
+            // Find which partial index this column corresponds to
+            const pIdx = numCols - 1 - c;
+            const color = pIdx < partialColors.length ? partialColors[pIdx] : '#888';
+            html += `<td><span class="digit-badge" id="bDigit${pIdx}" style="background:${color}">${v}</span></td>`;
+          }
+        }
+        html += '</tr>';
+      } else if (interactive && (isPartial || isResult)) {
+        const rowName = isPartial ? `partial${partialIdx}` : 'result';
+        const trId = isPartial ? `workingPartial${partialIdx}` : 'workingResultRow';
+        const color = isPartial ? partialColors[partialIdx] : '#27ae60';
+        if (isPartial) partialIdx++;
+        const cls = isResult ? 'result-row' : 'partial-row';
+        const disabled = isResult ? ' disabled' : '';
+        // Op cell: colored dot for partial rows to match the multiplier digit
+        const opContent = isPartial
+          ? `<span class="partial-dot" style="background:${color}"></span>${row.op || ''}`
+          : (row.op || '');
+        const rowBg = isPartial ? ` style="background:${color}12"` : '';
+        html += `<tr class="${cls}" id="${trId}"${rowBg}><td class="op-cell">${opContent}</td>`;
+        for (let c = 0; c < numCols; c++) {
+          const v = row.digits[c];
+          if (v == null) {
+            html += '<td class="dim">·</td>';
+          } else {
+            html += `<td class="input-cell"><input class="digit-input" type="text" inputmode="numeric" maxlength="1" data-answer="${v}" data-row="${rowName}" data-col="${c}" autocomplete="off"${disabled}></td>`;
+          }
+        }
+        html += '</tr>';
+      } else {
+        const cls = isResult ? 'result-row' : isPartial ? 'partial-row' : '';
+        html += `<tr class="${cls}"><td class="op-cell">${row.op || ''}</td>`;
+        for (let c = 0; c < numCols; c++) {
+          const v = row.digits[c];
+          html += `<td class="${v == null ? 'dim' : ''}">${v != null ? v : '·'}</td>`;
+        }
+        html += '</tr>';
       }
-      html += '</tr>';
     });
     html += '</table>';
     return html;
@@ -1397,25 +1656,37 @@ function buildMultWorkings(a, b) {
 
   const tableRows = [numToDigitRow(a, '', 'number'), numToDigitRow(b, '×', 'number'), { type: 'sep' }];
   partialInfos.forEach(info => {
-    if (bStr.length > 1) tableRows.push({ type: 'carry', digits: info.carryRow });
-    tableRows.push(numToDigitRow(info.fullVal, bStr.length > 1 ? '+' : '', 'partial'));
+    if (isMultiDigit) tableRows.push({ type: 'carry', digits: info.carryRow });
+    tableRows.push(numToDigitRow(info.fullVal, isMultiDigit ? '+' : '', 'partial'));
   });
-  if (bStr.length > 1) {
-    tableRows.push({ type: 'sep' });
+  if (isMultiDigit) {
+    tableRows.push({ type: 'sep', sepId: 'workingFinalSep' });
     tableRows.push(numToDigitRow(total, '', 'result'));
   }
 
   const placeNames = t('placeNames');
   let html = '<div class="mult-workings">';
   html += `<div style="text-align:center;font-weight:bold;color:#888;margin-bottom:12px;font-size:0.95em;">${t('columnMethod')}</div>`;
-  html += makeColTable(tableRows);
+  html += makeColTable(tableRows, isMultiDigit);
 
+  // Step explanation sections (interactive: hidden detail; static: shown immediately)
   partialInfos.forEach((info, idx) => {
     const placeName = placeNames[info.shift] || `×10<sup>${info.shift}</sup>`;
     const shiftNote = info.shift > 0
       ? ` — <span class="place-note">${t('thisIsThe')} <em>${placeName}</em>${t('digitOf')} ${b}, ${t('soShift')} ${info.shift} ${t('placeLeft').replace('{s}', info.shift>1?'s':'')} (${t('addZeros')} ${info.shift} ${info.shift>1?t('zero')+(lang==='en'?'s':'or'):t('zero')})</span>`
       : '';
-    html += `<div class="step-section"><div class="step-title">${t('step')} ${idx+1}: ${a} × ${info.bDigit}${shiftNote}</div>`;
+    const stepColor = isMultiDigit ? partialColors[idx] : '#e74c3c';
+    html += `<div class="step-section" style="border-left-color:${stepColor}"><div class="step-title"><span class="partial-dot" style="background:${stepColor}"></span> ${t('step')} ${idx+1}: ${a} × ${info.bDigit}${shiftNote}</div>`;
+
+    if (isMultiDigit) {
+      // "See how" toggle — hidden until partial row completed in column table
+      html += `<button class="working-detail-toggle" id="workingToggle${idx}" style="display:none" onclick="toggleWorkingDetail(${idx})">${t('showHowItWorks')}</button>`;
+      html += `<div class="working-detail" id="workingDetail${idx}">`;
+    } else {
+      html += '<div>';
+    }
+
+    // Digit-by-digit breakdown
     if (info.bDigit === 0) {
       html += `<div class="digit-steps"><div class="digit-step">${t('anythingTimesZero')}</div></div>`;
     } else {
@@ -1435,20 +1706,172 @@ function buildMultWorkings(a, b) {
     html += `<div class="partial-result">`;
     if (info.shift > 0) html += `${a} × ${info.bDigit} = ${info.partialVal}, ${t('thenAddZeros')} ${'0'.repeat(info.shift)} → <strong>${fullStr}</strong>`;
     else html += `${t('result')}: <strong>${fullStr}</strong>`;
-    html += `</div></div>`;
+    html += `</div></div></div>`;
   });
 
-  if (bStr.length > 1) {
-    html += `<div class="step-section add-section"><div class="step-title">${t('finalStep')}</div><div class="digit-steps">`;
-    partialInfos.forEach(info => {
-      html += `<div class="digit-step">${a} × ${info.bDigit}${'0'.repeat(info.shift)} = ${info.fullVal.toLocaleString()}</div>`;
-    });
-    html += `</div><div class="partial-result" style="color:#27ae60;font-size:1.3em;">`;
-    html += partialInfos.map(i => i.fullVal.toLocaleString()).join(' + ');
-    html += ` = <strong>${total.toLocaleString()}</strong></div></div>`;
+  if (isMultiDigit) {
+    html += `<div class="working-total" id="workingTotalSection">
+      <div class="step-section add-section" style="display:none" id="workingFinalHint">
+        <div class="step-title">${t('addPartials')}</div>
+        <div class="digit-steps" id="workingFinalExpr"></div>
+        <div class="partial-result" style="color:#27ae60;font-size:1.1em;" id="workingFinalLabel">${t('solvePartsHint')}</div>
+      </div>
+    </div>`;
   }
+
   html += '</div>';
+
+  // Attach event listeners after DOM insertion (via setTimeout)
+  if (isMultiDigit) {
+    setTimeout(() => {
+      document.querySelectorAll('.digit-input').forEach(inp => {
+        inp.addEventListener('input', function() { checkDigit(this); });
+        inp.addEventListener('keydown', function(e) {
+          // Allow Backspace to move to previous input
+          if (e.key === 'Backspace' && !this.value) {
+            const allInRow = Array.from(this.closest('tr').querySelectorAll('.digit-input:not([disabled])'));
+            const idx = allInRow.indexOf(this);
+            if (idx > 0) { allInRow[idx - 1].readOnly = false; allInRow[idx - 1].classList.remove('correct'); allInRow[idx - 1].value = ''; allInRow[idx - 1].focus(); }
+          }
+        });
+      });
+      // Set initial focus + pulsing glow on the first input to fill
+      updateNextFocus();
+    }, 0);
+  }
+
   return html;
+}
+
+function updateNextFocus() {
+  // Remove pulsing glow from all inputs
+  document.querySelectorAll('.digit-input.next-focus').forEach(i => i.classList.remove('next-focus'));
+  // Find the first enabled, non-readonly, non-correct input in partial rows (top to bottom, right to left)
+  const partialRows = document.querySelectorAll('tr[id^="workingPartial"]');
+  for (const row of partialRows) {
+    const inputs = Array.from(row.querySelectorAll('.digit-input'));
+    // Right-to-left: find rightmost unfilled
+    for (let i = inputs.length - 1; i >= 0; i--) {
+      if (!inputs[i].readOnly && !inputs[i].disabled && !inputs[i].classList.contains('correct')) {
+        inputs[i].classList.add('next-focus');
+        inputs[i].focus();
+        return;
+      }
+    }
+  }
+  // If all partials done, focus first result input
+  const resultRow = document.getElementById('workingResultRow');
+  if (resultRow) {
+    const inputs = Array.from(resultRow.querySelectorAll('.digit-input'));
+    for (let i = inputs.length - 1; i >= 0; i--) {
+      if (!inputs[i].readOnly && !inputs[i].disabled && !inputs[i].classList.contains('correct')) {
+        inputs[i].classList.add('next-focus');
+        inputs[i].focus();
+        return;
+      }
+    }
+  }
+}
+
+function checkDigit(el) {
+  const val = el.value.trim();
+  if (!val) return;
+  const expected = el.dataset.answer;
+
+  if (val === expected) {
+    el.classList.remove('wrong');
+    el.classList.add('correct');
+    el.readOnly = true;
+    // Reveal the carry for the column to the LEFT of the just-entered digit
+    const rowName = el.dataset.row;
+    if (rowName && rowName.startsWith('partial')) {
+      const idx = parseInt(rowName.replace('partial', ''));
+      const col = parseInt(el.dataset.col);
+      const carryCell = document.getElementById('carry_' + idx + '_' + (col - 1));
+      if (carryCell) carryCell.classList.add('visible');
+    }
+    // Auto-advance: prefer left (like on paper), then right
+    const tr = el.closest('tr');
+    const allInRow = Array.from(tr.querySelectorAll('.digit-input'));
+    const myIdx = allInRow.indexOf(el);
+    let nextInput = null;
+    for (let i = myIdx - 1; i >= 0; i--) {
+      if (!allInRow[i].readOnly && !allInRow[i].disabled) { nextInput = allInRow[i]; break; }
+    }
+    if (!nextInput) {
+      for (let i = myIdx + 1; i < allInRow.length; i++) {
+        if (!allInRow[i].readOnly && !allInRow[i].disabled) { nextInput = allInRow[i]; break; }
+      }
+    }
+    if (nextInput) {
+      nextInput.focus();
+    } else {
+      // Row complete — check if all inputs in this row are correct
+      const rowName = el.dataset.row;
+      const allCorrect = allInRow.every(inp => inp.classList.contains('correct'));
+      if (allCorrect) onRowComplete(rowName);
+    }
+    updateNextFocus();
+  } else {
+    el.classList.remove('correct');
+    el.classList.add('wrong');
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+    setTimeout(() => { el.value = ''; el.classList.remove('wrong'); }, 600);
+  }
+}
+
+function onRowComplete(rowName) {
+  if (rowName.startsWith('partial')) {
+    const idx = parseInt(rowName.replace('partial', ''));
+    // Mark row visually complete
+    const row = document.getElementById('workingPartial' + idx);
+    if (row) row.classList.add('row-complete');
+    // Show "See how" toggle for explanation
+    const toggle = document.getElementById('workingToggle' + idx);
+    if (toggle) toggle.style.display = '';
+
+    // Check if all partial rows are done
+    const allPartialInputs = document.querySelectorAll('.digit-input[data-row^="partial"]');
+    const allPartialsDone = Array.from(allPartialInputs).every(inp => inp.classList.contains('correct'));
+    if (allPartialsDone) {
+      // Enable result row and reveal final separator
+      const sep = document.getElementById('workingFinalSep');
+      if (sep) { sep.classList.remove('hidden-row'); sep.classList.add('revealed-row'); }
+      const resultInputs = document.querySelectorAll('.digit-input[data-row="result"]');
+      resultInputs.forEach(inp => { inp.disabled = false; });
+      // Show the final addition hint
+      const solved = [];
+      document.querySelectorAll('tr[id^="workingPartial"]').forEach(tr => {
+        const digits = Array.from(tr.querySelectorAll('.digit-input')).map(i => i.value).join('');
+        solved.push(parseInt(digits));
+      });
+      const finalHint = document.getElementById('workingFinalHint');
+      if (finalHint) {
+        finalHint.style.display = '';
+        document.getElementById('workingFinalExpr').innerHTML =
+          solved.map(v => `<div class="digit-step">${v.toLocaleString()}</div>`).join('');
+        document.getElementById('workingFinalLabel').textContent =
+          solved.join(' + ') + ' = ?';
+      }
+      // Focus first result input (right to left)
+      updateNextFocus();
+    }
+  } else if (rowName === 'result') {
+    const row = document.getElementById('workingResultRow');
+    if (row) row.classList.add('row-complete');
+    const label = document.getElementById('workingFinalLabel');
+    if (label) { label.textContent = '✓ ' + t('allStepsSolved'); label.style.color = '#27ae60'; }
+  }
+}
+
+function toggleWorkingDetail(index) {
+  const detail = document.getElementById('workingDetail' + index);
+  const toggle = document.getElementById('workingToggle' + index);
+  const isVisible = detail.classList.contains('visible');
+  detail.classList.toggle('visible');
+  toggle.textContent = isVisible ? t('showHowItWorks') : t('hideHowItWorks');
 }
 
 /* ───────── DIVISION ───────── */
@@ -1459,6 +1882,12 @@ function renderDivision(total, divisor) {
     `${total} ÷ ${divisor} = ?` + (remainder ? ' ' + t('justQuotient') : '');
   document.getElementById('answerBox').textContent =
     `= ${quotient}` + (remainder ? ` ${t('remainder')} ${remainder}` : '');
+
+  // Division: hide method picker, show break content for apple visuals, show div workings card
+  document.getElementById('methodPicker').style.display = 'none';
+  document.getElementById('methodBreakContent').style.display = '';
+  document.getElementById('methodColumnContent').style.display = 'none';
+  document.getElementById('divWorkingsCard').style.display = '';
 
   const container = document.getElementById('groupsContainer');
   container.innerHTML = '';
@@ -1508,7 +1937,10 @@ function renderDivision(total, divisor) {
     container.innerHTML = `<div class="too-many">${t('tooMany')}</div>`;
   }
 
-  document.getElementById('workings').innerHTML = buildDivWorkings(total, divisor);
+  document.getElementById('divWorkings').innerHTML = buildDivWorkings(total, divisor);
+  // Reapply toggle state
+  if (document.getElementById('stepsToggle').checked)
+    document.getElementById('stepsArea').classList.add('visible');
 }
 
 function buildDivWorkings(dividend, divisor) {
