@@ -286,6 +286,29 @@ h1 {
 .col-table .hidden-row td { visibility: hidden; }
 .col-table .revealed-row td { visibility: visible; }
 .row-complete td .digit-input { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+/* Color-coded multiplier digit badges */
+.digit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: bold;
+  color: white;
+  font-size: 1em;
+}
+/* Partial row color indicator dot */
+.partial-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+/* Step section colored left border inherits from partial color */
+.step-section[data-color] { border-left-width: 5px; }
 
 /* Apple grid for medium numbers */
 .apple-grid {
@@ -1462,6 +1485,13 @@ function buildMultWorkings(a, b) {
   const numCols = totalStr.length;
   const isMultiDigit = bStr.length > 1;
 
+  // Colors for linking multiplier digits to their partial product rows
+  const partialColors = ['#e74c3c', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
+  // Map: for each partialIdx, which column in the multiplier row does it correspond to?
+  // partialIdx 0 → rightmost digit of b → column numCols-1
+  // partialIdx 1 → second from right → column numCols-2, etc.
+  function bDigitCol(pIdx) { return numCols - 1 - pIdx; }
+
   function makeColTable(rows, interactive) {
     let html = '<table class="col-table">';
     let partialIdx = 0;
@@ -1484,14 +1514,35 @@ function buildMultWorkings(a, b) {
       }
       const isPartial = row.type === 'partial';
       const isResult = row.type === 'result';
+      const isMultiplier = row.type === 'number' && row.op === '×';
 
-      if (interactive && (isPartial || isResult)) {
+      if (interactive && isMultiplier) {
+        // Multiplier row: color-code each digit with a badge
+        html += `<tr><td class="op-cell">${row.op}</td>`;
+        for (let c = 0; c < numCols; c++) {
+          const v = row.digits[c];
+          if (v == null) {
+            html += '<td class="dim">·</td>';
+          } else {
+            // Find which partial index this column corresponds to
+            const pIdx = numCols - 1 - c;
+            const color = pIdx < partialColors.length ? partialColors[pIdx] : '#888';
+            html += `<td><span class="digit-badge" id="bDigit${pIdx}" style="background:${color}">${v}</span></td>`;
+          }
+        }
+        html += '</tr>';
+      } else if (interactive && (isPartial || isResult)) {
         const rowName = isPartial ? `partial${partialIdx}` : 'result';
         const trId = isPartial ? `workingPartial${partialIdx}` : 'workingResultRow';
+        const color = isPartial ? partialColors[partialIdx] : '#27ae60';
         if (isPartial) partialIdx++;
         const cls = isResult ? 'result-row' : 'partial-row';
         const disabled = isResult ? ' disabled' : '';
-        html += `<tr class="${cls}" id="${trId}"><td class="op-cell">${row.op || ''}</td>`;
+        // Op cell: colored dot for partial rows to match the multiplier digit
+        const opContent = isPartial
+          ? `<span class="partial-dot" style="background:${color}"></span>${row.op || ''}`
+          : (row.op || '');
+        html += `<tr class="${cls}" id="${trId}"><td class="op-cell">${opContent}</td>`;
         for (let c = 0; c < numCols; c++) {
           const v = row.digits[c];
           if (v == null) {
@@ -1571,7 +1622,8 @@ function buildMultWorkings(a, b) {
     const shiftNote = info.shift > 0
       ? ` — <span class="place-note">${t('thisIsThe')} <em>${placeName}</em>${t('digitOf')} ${b}, ${t('soShift')} ${info.shift} ${t('placeLeft').replace('{s}', info.shift>1?'s':'')} (${t('addZeros')} ${info.shift} ${info.shift>1?t('zero')+(lang==='en'?'s':'or'):t('zero')})</span>`
       : '';
-    html += `<div class="step-section"><div class="step-title">${t('step')} ${idx+1}: ${a} × ${info.bDigit}${shiftNote}</div>`;
+    const stepColor = isMultiDigit ? partialColors[idx] : '#e74c3c';
+    html += `<div class="step-section" style="border-left-color:${stepColor}"><div class="step-title"><span class="partial-dot" style="background:${stepColor}"></span> ${t('step')} ${idx+1}: ${a} × ${info.bDigit}${shiftNote}</div>`;
 
     if (isMultiDigit) {
       // "See how" toggle — hidden until partial row completed in column table
