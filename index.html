@@ -1697,6 +1697,13 @@ function checkDigit(el) {
     el.classList.remove('wrong');
     el.classList.add('correct');
     el.readOnly = true;
+    // Reveal carry row immediately on first correct digit (so user sees carry for next column)
+    const rowName = el.dataset.row;
+    if (rowName && rowName.startsWith('partial')) {
+      const idx = parseInt(rowName.replace('partial', ''));
+      const carry = document.getElementById('workingCarry' + idx);
+      if (carry) { carry.classList.remove('hidden-row'); carry.classList.add('revealed-row'); }
+    }
     // Auto-advance: prefer left (like on paper), then right
     const tr = el.closest('tr');
     const allInRow = Array.from(tr.querySelectorAll('.digit-input'));
@@ -1731,9 +1738,6 @@ function checkDigit(el) {
 function onRowComplete(rowName) {
   if (rowName.startsWith('partial')) {
     const idx = parseInt(rowName.replace('partial', ''));
-    // Reveal carry row above
-    const carry = document.getElementById('workingCarry' + idx);
-    if (carry) { carry.classList.remove('hidden-row'); carry.classList.add('revealed-row'); }
     // Mark row visually complete
     const row = document.getElementById('workingPartial' + idx);
     if (row) row.classList.add('row-complete');
