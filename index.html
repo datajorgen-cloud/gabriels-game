@@ -975,7 +975,7 @@ h1 {
   <div class="answer-area">
     <div class="equation" id="equation"></div>
     <div class="answer-input-row">
-      <input type="number" class="answer-input" id="answerInput" placeholder="?" onkeydown="if(event.key==='Enter')checkAnswer()">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="answer-input" id="answerInput" placeholder="?" onkeydown="if(event.key==='Enter')checkAnswer()">
       <button class="check-btn" id="checkBtn" onclick="checkAnswer()" data-t="check">Check! ✓</button>
     </div>
     <div class="feedback-msg" id="feedbackMsg"></div>
@@ -1602,7 +1602,7 @@ function renderVisualMult(a, b, total) {
       html += `<div class="break-part">
         <span class="break-label">${a} × ${p.factor} = </span>
         <div class="break-input-row">
-          <input type="number" class="break-input" id="subInput${i}" data-answer="${p.value}" data-index="${i}" data-color="${color}" placeholder="?" onkeydown="if(event.key==='Enter')checkSubProblem(${i})">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" class="break-input" id="subInput${i}" data-answer="${p.value}" data-index="${i}" data-color="${color}" placeholder="?" onkeydown="if(event.key==='Enter')checkSubProblem(${i})">
           <button class="break-check-btn" onclick="checkSubProblem(${i})">Check</button>
           <span class="break-result" id="subResult${i}"></span>
         </div>
@@ -2186,7 +2186,7 @@ function buildDivWorkings(dividend, divisor) {
   const dLen = dividendStr.length;
   const sep = '─'.repeat(dLen + String(divisor).length + 5);
   let lines = [];
-  lines.push(`<span class="step">  ${divisor} ) ${dividendStr}</span>`);
+  lines.push(`<span class="step">  ${dividendStr} / ${divisor}</span>`);
   lines.push(`<span class="line-sep">  ${sep}</span>`);
   for (let i = 0; i < steps.length; i++) {
     const s = steps[i];
