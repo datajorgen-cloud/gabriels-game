@@ -108,9 +108,9 @@ test('next button generates a new question', async ({ page }) => {
 test('mode buttons switch operation type', async ({ page }) => {
   await page.click('.start-game-btn');
 
-  await page.click('button.mode-btn.mult');
+  await page.click('button.mode-opt.mult');
   await expect(page.locator('#equation')).toContainText('×');
 
-  await page.click('button.mode-btn.div');
+  await page.click('button.mode-opt.div');
   await expect(page.locator('#equation')).toContainText('÷');
 });
