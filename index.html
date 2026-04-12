@@ -2255,25 +2255,21 @@ function renderDivision(total, divisor) {
   }
 
   // Show interactive bus-stop for larger divisions, static workings for simple ones
-  const isLargeDivision = total >= 100 && String(total).length > String(divisor).length && level <= 8;
+  const isLargeDivision = level >= 4 && level <= 8 && String(total).length > String(divisor).length;
   const busStopEl = document.getElementById('divBusStop');
   const stepsLabel = document.getElementById('stepsToggleLabel');
 
+  // Hide the hand workings card for division — bus-stop or apples are enough
+  document.getElementById('divWorkingsCard').style.display = 'none';
+
   if (isLargeDivision) {
+    // Hide the apple visual area — the bus-stop replaces it
+    document.getElementById('methodBreakContent').style.display = 'none';
     busStopEl.style.display = '';
     initDivBusStop(total, divisor);
-    // Still provide static workings as fallback behind toggle
-    document.getElementById('divWorkings').innerHTML = buildDivWorkings(total, divisor);
-    stepsLabel.style.display = '';
-    if (document.getElementById('stepsToggle').checked)
-      document.getElementById('stepsArea').classList.add('visible');
   } else {
     busStopEl.style.display = 'none';
     busStopEl.innerHTML = '';
-    document.getElementById('divWorkings').innerHTML = buildDivWorkings(total, divisor);
-    stepsLabel.style.display = '';
-    if (document.getElementById('stepsToggle').checked)
-      document.getElementById('stepsArea').classList.add('visible');
   }
 }
 
