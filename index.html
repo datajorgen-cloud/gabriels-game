@@ -711,6 +711,115 @@ h1 {
 .div-workings .result-line { color: #27ae60; font-weight: bold; }
 .div-workings .line-sep { color: #bbb; }
 
+/* Interactive bus-stop division */
+.bus-stop-container {
+  display: inline-flex; align-items: flex-start; gap: 0;
+  font-family: 'Courier New', monospace; font-size: 1.4em; font-weight: bold;
+  background: #f8f8ff; border-radius: 14px; padding: 20px 24px 24px;
+  border: 2px solid #d0d0ff; margin: 0 auto;
+}
+.bus-stop-divisor {
+  color: #3498db; font-size: 1.1em; padding-top: 42px; padding-right: 6px;
+  display: flex; align-items: flex-start;
+}
+.bus-stop-main { display: flex; flex-direction: column; }
+.bus-stop-answer-row {
+  display: flex; gap: 2px; padding-left: 2px; min-height: 40px;
+}
+.bus-stop-answer-row .digit-input {
+  width: 38px; height: 38px; font-size: 1em; font-weight: bold;
+}
+.bus-stop-bracket {
+  border-top: 4px solid #2c3e50; border-left: 4px solid #2c3e50;
+  border-radius: 6px 0 0 0; padding: 6px 4px 0 8px;
+}
+.bus-stop-dividend-row { display: flex; gap: 2px; }
+.bus-stop-dividend-digit {
+  width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+  color: #2c3e50; transition: all 0.3s; position: relative;
+}
+.bus-stop-dividend-digit.bs-active {
+  background: rgba(52,152,219,0.12); border-radius: 6px; color: #3498db;
+}
+.bus-stop-dividend-digit.bs-used { color: #bbb; }
+
+.bus-stop-workings {
+  margin-top: 12px; padding-left: 8px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.bus-stop-step-group {
+  display: none; flex-direction: column; gap: 2px;
+  font-size: 0.75em; font-weight: 600; color: #555;
+  animation: busStepIn 0.35s ease-out;
+  padding: 4px 0 6px 4px; border-left: 3px solid #d0d0ff;
+  margin-bottom: 4px;
+}
+.bus-stop-step-group.visible { display: flex; }
+@keyframes busStepIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.bs-subtract { color: #e74c3c; }
+.bs-remainder { color: #3498db; }
+.bs-bring-down { color: #8e44ad; }
+.bs-carry {
+  position: absolute; top: -2px; left: -2px;
+  font-size: 0.45em; font-weight: 700; color: #e67e22;
+  opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.bs-carry.visible {
+  opacity: 1;
+  animation: carryPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.bs-hint {
+  font-size: 0.7em; font-weight: 500; color: #e67e22;
+  margin-top: 4px; min-height: 1.2em;
+}
+.bus-stop-complete {
+  display: none; text-align: center; font-size: 0.8em; font-weight: 700;
+  color: #27ae60; margin-top: 10px;
+  animation: busStepIn 0.35s ease-out;
+}
+.bus-stop-complete.visible { display: block; }
+
+/* Multiples helper table */
+.bus-stop-wrapper {
+  display: inline-flex; align-items: flex-start; gap: 18px;
+  justify-content: center; flex-wrap: wrap;
+}
+.bs-multiples {
+  background: #fffdf0; border: 2px solid #f0e6c0; border-radius: 12px;
+  padding: 10px 14px; font-family: 'Courier New', monospace;
+  font-size: 0.85em; line-height: 1.7; color: #555; white-space: nowrap;
+  min-width: 120px;
+}
+.bs-multiples-title {
+  font-weight: 700; color: #e67e22; font-size: 0.9em;
+  margin-bottom: 4px; text-align: center;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.bs-mult-row { transition: all 0.3s; padding: 1px 4px; border-radius: 4px; }
+.bs-mult-row.bs-mult-highlight {
+  background: #e8f8f0; color: #27ae60; font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .bus-stop-container { font-size: 1.15em; padding: 14px 14px 16px; }
+  .bus-stop-answer-row .digit-input { width: 30px; height: 30px; font-size: 0.9em; }
+  .bus-stop-dividend-digit { width: 30px; height: 30px; }
+  .bus-stop-divisor { padding-top: 34px; }
+  .bus-stop-wrapper { gap: 10px; }
+  .bs-multiples { font-size: 0.78em; padding: 8px 10px; min-width: 100px; }
+}
+@media (max-width: 380px) {
+  .bus-stop-container { font-size: 1em; padding: 10px 10px 14px; }
+  .bus-stop-answer-row .digit-input { width: 26px; height: 26px; font-size: 0.85em; }
+  .bus-stop-dividend-digit { width: 26px; height: 26px; }
+  .bus-stop-divisor { padding-top: 30px; }
+  .bs-multiples { font-size: 0.72em; padding: 6px 8px; min-width: 90px; }
+}
+
 /* Difficulty badge */
 .difficulty-badge {
   text-align: center;
@@ -970,6 +1079,7 @@ h1 {
     <div id="methodColumnContent" class="method-tab-content">
       <div id="workings"></div>
     </div>
+    <div id="divBusStop" style="display:none;text-align:center"></div>
   </div>
 
   <div class="answer-area">
@@ -986,7 +1096,7 @@ h1 {
 </div>
 
 <div class="card" id="divWorkingsCard" style="display:none">
-  <label class="steps-toggle">
+  <label class="steps-toggle" id="stepsToggleLabel">
     <input type="checkbox" id="stepsToggle" onchange="toggleSteps()">
     <span id="labelWorkings">Show step-by-step hand workings</span>
   </label>
@@ -2144,10 +2254,27 @@ function renderDivision(total, divisor) {
     container.innerHTML = `<div class="too-many">${t('tooMany')}</div>`;
   }
 
-  document.getElementById('divWorkings').innerHTML = buildDivWorkings(total, divisor);
-  // Reapply toggle state
-  if (document.getElementById('stepsToggle').checked)
-    document.getElementById('stepsArea').classList.add('visible');
+  // Show interactive bus-stop for larger divisions, static workings for simple ones
+  const isLargeDivision = total >= 100 && String(total).length > String(divisor).length && level <= 8;
+  const busStopEl = document.getElementById('divBusStop');
+  const stepsLabel = document.getElementById('stepsToggleLabel');
+
+  if (isLargeDivision) {
+    busStopEl.style.display = '';
+    initDivBusStop(total, divisor);
+    // Still provide static workings as fallback behind toggle
+    document.getElementById('divWorkings').innerHTML = buildDivWorkings(total, divisor);
+    stepsLabel.style.display = '';
+    if (document.getElementById('stepsToggle').checked)
+      document.getElementById('stepsArea').classList.add('visible');
+  } else {
+    busStopEl.style.display = 'none';
+    busStopEl.innerHTML = '';
+    document.getElementById('divWorkings').innerHTML = buildDivWorkings(total, divisor);
+    stepsLabel.style.display = '';
+    if (document.getElementById('stepsToggle').checked)
+      document.getElementById('stepsArea').classList.add('visible');
+  }
 }
 
 function buildDivWorkings(dividend, divisor) {
@@ -2203,6 +2330,256 @@ function buildDivWorkings(dividend, divisor) {
   const finalRemNote = finalRem > 0 ? `  ${t('remainder')} ${finalRem}` : '';
   lines.push(`<span class="result-line">  ${dividend} ÷ ${divisor}  =  <strong>${cleanQ}</strong>${finalRemNote}</span>`);
   return `<div class="div-workings">${lines.join('\n')}</div>`;
+}
+
+/* ───────── INTERACTIVE BUS-STOP DIVISION ───────── */
+
+function buildDivBusStop(dividend, divisor) {
+  const dividendStr = String(dividend);
+  const steps = []; // { current, q, subtract, rem, broughtDigit }
+  let current = 0;
+
+  for (let i = 0; i < dividendStr.length; i++) {
+    current = current * 10 + parseInt(dividendStr[i]);
+    const q = Math.floor(current / divisor);
+    const subtract = q * divisor;
+    const rem = current - subtract;
+    steps.push({ current, q, subtract, rem, digitIndex: i });
+    current = rem;
+  }
+
+  // Build answer inputs
+  let answerCells = '';
+  for (let i = 0; i < steps.length; i++) {
+    answerCells += `<input class="digit-input" type="text" inputmode="numeric" maxlength="1" `
+      + `data-answer="${steps[i].q}" data-step="${i}" `
+      + `readonly aria-label="Quotient digit ${i + 1}">`;
+  }
+
+  // Build dividend digits with carry/remainder superscripts
+  let dividendCells = '';
+  for (let i = 0; i < dividendStr.length; i++) {
+    // If the previous step had a remainder, show it as a small carry before this digit
+    const prevRem = i > 0 ? steps[i - 1].rem : 0;
+    const carryHtml = prevRem > 0
+      ? `<span class="bs-carry" data-carry-for="${i}">${prevRem}</span>`
+      : '';
+    dividendCells += `<span class="bus-stop-dividend-digit" data-dindex="${i}">${carryHtml}${dividendStr[i]}</span>`;
+  }
+
+  // Build working step groups (hidden initially)
+  let workingSteps = '';
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    const nextDigit = i < dividendStr.length - 1 ? dividendStr[i + 1] : null;
+    const nextCurrent = nextDigit !== null ? (s.rem * 10 + parseInt(nextDigit)) : null;
+
+    let stepHtml = `<div class="bus-stop-step-group" data-step="${i}">`;
+    if (s.current < divisor && s.q === 0) {
+      // Can't divide yet — just note it and bring down
+      if (nextDigit !== null) {
+        stepHtml += `<span class="bs-bring-down">${s.current} < ${divisor}, bring down ${nextDigit} → ${nextCurrent}</span>`;
+      } else {
+        stepHtml += `<span>${s.current} < ${divisor} → 0</span>`;
+      }
+    } else {
+      stepHtml += `<span class="bs-subtract">${s.q} × ${divisor} = ${s.subtract}</span>`;
+      stepHtml += `<span class="bs-remainder">${s.current} − ${s.subtract} = ${s.rem}</span>`;
+      if (nextDigit !== null) {
+        stepHtml += `<span class="bs-bring-down">Bring down ${nextDigit} → ${nextCurrent}</span>`;
+      } else if (s.rem > 0) {
+        stepHtml += `<span class="bs-remainder">Remainder: ${s.rem}</span>`;
+      }
+    }
+    stepHtml += `</div>`;
+    workingSteps += stepHtml;
+  }
+
+  // Build multiples helper table (1× through 9×)
+  let multiplesRows = '';
+  for (let m = 1; m <= 9; m++) {
+    multiplesRows += `<div class="bs-mult-row" data-mult="${m}">${m} × ${divisor} = ${m * divisor}</div>`;
+  }
+  const multiplesHtml = `<div class="bs-multiples">
+    <div class="bs-multiples-title">${divisor}× table</div>
+    ${multiplesRows}
+  </div>`;
+
+  const html = `<div class="bus-stop-wrapper">
+    <div class="bus-stop-container">
+      <div class="bus-stop-divisor">${divisor}</div>
+      <div class="bus-stop-main">
+        <div class="bus-stop-answer-row">${answerCells}</div>
+        <div class="bus-stop-bracket">
+          <div class="bus-stop-dividend-row">${dividendCells}</div>
+        </div>
+        <div class="bus-stop-workings">${workingSteps}
+          <div class="bs-hint" id="bsHint"></div>
+        </div>
+        <div class="bus-stop-complete" id="bsComplete">✓ All steps solved!</div>
+      </div>
+    </div>
+    ${multiplesHtml}
+  </div>`;
+
+  return { html, steps };
+}
+
+function initDivBusStop(dividend, divisor) {
+  const container = document.getElementById('divBusStop');
+  const result = buildDivBusStop(dividend, divisor);
+  container.innerHTML = result.html;
+  container._steps = result.steps;
+
+  // Enable only the first input, rest stay readonly
+  const inputs = container.querySelectorAll('.digit-input');
+  if (inputs.length > 0) {
+    inputs[0].removeAttribute('readonly');
+    inputs[0].classList.add('next-focus');
+
+    // Highlight first dividend digit(s)
+    updateDivHighlight(container, 0);
+  }
+
+  // Bind events after DOM insertion
+  setTimeout(() => {
+    const allInputs = container.querySelectorAll('.digit-input');
+    allInputs.forEach(el => {
+      el.addEventListener('input', function() { checkDivDigit(this); });
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value) {
+          const step = parseInt(this.dataset.step);
+          if (step > 0) {
+            const prev = container.querySelector(`.digit-input[data-step="${step - 1}"]`);
+            if (prev && prev.classList.contains('correct')) return; // can't go back to correct
+          }
+        }
+      });
+    });
+  }, 50);
+}
+
+function checkDivDigit(el) {
+  const val = el.value.trim();
+  if (!val) return;
+
+  const container = document.getElementById('divBusStop');
+  const step = parseInt(el.dataset.step);
+  const expected = el.dataset.answer;
+  const steps = container._steps;
+  const hint = document.getElementById('bsHint');
+
+  if (val === expected) {
+    // Correct
+    el.classList.add('correct');
+    el.classList.remove('next-focus', 'wrong');
+    el.setAttribute('readonly', true);
+    spawnDigitCheck(el);
+    hint.textContent = '';
+
+    // Highlight matching multiple in the helper table
+    container.querySelectorAll('.bs-mult-row').forEach(r => r.classList.remove('bs-mult-highlight'));
+    const qDigit = parseInt(expected);
+    if (qDigit > 0) {
+      const multRow = container.querySelector(`.bs-mult-row[data-mult="${qDigit}"]`);
+      if (multRow) multRow.classList.add('bs-mult-highlight');
+    }
+
+    // Show working step
+    const stepGroup = container.querySelector(`.bus-stop-step-group[data-step="${step}"]`);
+    if (stepGroup) stepGroup.classList.add('visible');
+
+    // Reveal carry/remainder digit on the next dividend digit
+    const s = steps[step];
+    if (s.rem > 0 && step < steps.length - 1) {
+      const carry = container.querySelector(`.bs-carry[data-carry-for="${step + 1}"]`);
+      if (carry) carry.classList.add('visible');
+    }
+
+    // Mark current dividend digit(s) as used
+    markDivDigitsUsed(container, step);
+
+    // Check if done
+    const allInputs = container.querySelectorAll('.digit-input');
+    const allDone = Array.from(allInputs).every(i => i.classList.contains('correct'));
+
+    if (allDone) {
+      // All steps complete
+      const complete = document.getElementById('bsComplete');
+      complete.classList.add('visible');
+      spawnRowCelebration(container.querySelector('.bus-stop-answer-row'));
+      // Auto-focus main answer input
+      setTimeout(() => {
+        const mainInput = document.getElementById('answerInput');
+        if (mainInput) mainInput.focus();
+      }, 600);
+    } else {
+      // Enable next input
+      const nextInput = container.querySelector(`.digit-input[data-step="${step + 1}"]`);
+      if (nextInput) {
+        nextInput.removeAttribute('readonly');
+        nextInput.classList.add('next-focus');
+        updateDivHighlight(container, step + 1);
+        setTimeout(() => nextInput.focus(), 50);
+      }
+    }
+  } else {
+    // Wrong
+    el.classList.add('wrong');
+    el.style.animation = 'shake 0.4s';
+    const s = steps[step];
+    if (s.current < currentB) {
+      hint.textContent = `${s.current} is less than ${currentB} — what goes here?`;
+    } else {
+      hint.textContent = `What's the biggest number × ${currentB} that fits in ${s.current}?`;
+    }
+    setTimeout(() => {
+      el.value = '';
+      el.classList.remove('wrong');
+      el.style.animation = '';
+    }, 500);
+  }
+}
+
+function updateDivHighlight(container, stepIndex) {
+  const steps = container._steps;
+  const digits = container.querySelectorAll('.bus-stop-dividend-digit');
+
+  // Remove all highlights
+  digits.forEach(d => d.classList.remove('bs-active'));
+
+  // The current step considers digits from the first unconsumed digit up to this step's digit
+  // Find the range: from first non-used digit to stepIndex's digitIndex
+  const s = steps[stepIndex];
+  if (!s) return;
+
+  // For a "bring down" scenario, we highlight from the first digit that contributed to current
+  // The "current" value at step i was built from remainder of step i-1 plus digit i
+  // Highlight digit i, and also the "remainder" portion from before
+  digits[s.digitIndex].classList.add('bs-active');
+
+  // If current > single digit value, also highlight previous digit(s) that carried remainder
+  if (stepIndex > 0 && steps[stepIndex - 1].rem > 0) {
+    // The previous remainder carried over - highlight that context
+    digits[steps[stepIndex - 1].digitIndex].classList.remove('bs-used');
+    digits[steps[stepIndex - 1].digitIndex].classList.add('bs-active');
+  }
+}
+
+function markDivDigitsUsed(container, stepIndex) {
+  const steps = container._steps;
+  const digits = container.querySelectorAll('.bus-stop-dividend-digit');
+  const s = steps[stepIndex];
+  // Mark this digit as used (unless it carries remainder to next)
+  if (stepIndex === steps.length - 1 || s.rem === 0) {
+    digits[s.digitIndex].classList.add('bs-used');
+    digits[s.digitIndex].classList.remove('bs-active');
+  }
+  // Mark all previous digits as fully used
+  for (let i = 0; i < s.digitIndex; i++) {
+    digits[i].classList.add('bs-used');
+    digits[i].classList.remove('bs-active');
+  }
 }
 
 /* ───────── CELEBRATION ───────── */
