@@ -70,26 +70,30 @@ h1 {
 }
 .wrong-dot.filled { background: #e74c3c; }
 
-.mode-buttons {
-  display: flex;
+.mode-toggle {
+  display: inline-flex;
   justify-content: center;
-  gap: 8px;
   margin-bottom: 24px;
+  background: #eee;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 0;
 }
-.mode-btn {
-  padding: 8px 20px;
-  font-size: 0.95em;
+.mode-opt {
+  padding: 8px 18px;
+  font-size: 0.9em;
   border: none;
-  border-radius: 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.2s;
+  background: transparent;
+  color: #888;
 }
-.mode-btn.both { background: #8e44ad; color: white; }
-.mode-btn.mult { background: #e74c3c; color: white; }
-.mode-btn.div  { background: #3498db; color: white; }
-.mode-btn.active { transform: scale(1.08); box-shadow: 0 3px 12px rgba(0,0,0,0.2); }
-.mode-btn:not(.active) { opacity: 0.45; }
+.mode-opt.active { color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.mode-opt.active.mult { background: #e74c3c; }
+.mode-opt.active.div  { background: #3498db; }
+.mode-opt.active.both { background: #8e44ad; }
 
 .card {
   background: white;
@@ -277,7 +281,7 @@ h1 {
 .digit-input::-webkit-inner-spin-button,
 .digit-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .digit-input:focus { border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
-.digit-input.correct { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+.digit-input.correct { border-color: #27ae60; background: #eafaf1; color: #27ae60; box-shadow: 0 0 8px rgba(39,174,96,0.35); }
 .digit-input.wrong { border-color: #e74c3c; background: #fdf0ef; }
 .digit-input:disabled { background: #f0f0f0; border-color: #ddd; color: #bbb; cursor: not-allowed; }
 .col-table td.input-cell { padding: 2px; }
@@ -439,8 +443,8 @@ h1 {
   100% { transform: scale(1); opacity: 1; }
 }
 @keyframes nextBtnPulse {
-  0%, 100% { box-shadow: 0 4px 15px rgba(52,152,219,0.3); }
-  50%      { box-shadow: 0 6px 30px rgba(52,152,219,0.6); }
+  0%, 100% { box-shadow: 0 4px 15px rgba(52,152,219,0.3); filter: brightness(1); }
+  50%      { box-shadow: 0 6px 35px rgba(52,152,219,0.7), 0 0 12px rgba(52,152,219,0.4); filter: brightness(1.12); }
 }
 
 .answer-box {
@@ -599,12 +603,28 @@ h1 {
 
 /* Correct digit pop */
 @keyframes digitPop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.3); }
-  70%  { transform: scale(0.95); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1); box-shadow: 0 0 0 rgba(39,174,96,0); }
+  30%  { transform: scale(1.35); box-shadow: 0 0 18px rgba(39,174,96,0.6); }
+  60%  { transform: scale(0.92); }
+  80%  { transform: scale(1.05); }
+  100% { transform: scale(1); box-shadow: 0 0 8px rgba(39,174,96,0.35); }
 }
-.digit-pop { animation: digitPop 0.3s ease; }
+.digit-pop { animation: digitPop 0.4s ease; }
+
+/* Row complete sweep */
+@keyframes rowSweep {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+.row-complete {
+  animation: rowCelebrate 0.6s ease;
+}
+@keyframes rowCelebrate {
+  0%   { filter: brightness(1); }
+  30%  { filter: brightness(1.3); }
+  60%  { filter: brightness(1.1); }
+  100% { filter: brightness(1); }
+}
 
 /* Steps toggle */
 .steps-toggle {
@@ -644,6 +664,30 @@ h1 {
 .col-table .result-row td { color: #27ae60; font-weight: bold; }
 .col-table .partial-row td { }
 .col-table td.dim { color: #bbb; }
+
+/* Responsive column table for mobile */
+#workings {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 520px) {
+  .col-table { font-size: 1em; }
+  .col-table td { width: 28px; height: 28px; }
+  .col-table td.op-cell { width: 30px; padding-right: 3px; font-size: 0.85em; }
+  .col-table .carry-row td { height: 18px; font-size: 0.65em; }
+  .digit-input { width: 26px; height: 26px; font-size: 1em; border-width: 1.5px; border-radius: 4px; }
+  .digit-badge { width: 20px; height: 20px; font-size: 0.8em; }
+  .partial-dot { width: 8px; height: 8px; }
+}
+@media (max-width: 380px) {
+  .col-table { font-size: 0.85em; }
+  .col-table td { width: 24px; height: 24px; }
+  .col-table td.op-cell { width: 26px; padding-right: 2px; font-size: 0.75em; }
+  .col-table .carry-row td { height: 16px; font-size: 0.6em; }
+  .digit-input { width: 22px; height: 22px; font-size: 0.9em; border-width: 1.5px; border-radius: 3px; }
+  .digit-badge { width: 18px; height: 18px; font-size: 0.7em; }
+  .partial-dot { width: 6px; height: 6px; }
+}
 
 .step-section {
   background: #f8f8ff; border-left: 4px solid #e74c3c;
@@ -903,10 +947,12 @@ h1 {
   </div>
 </div>
 
-<div class="mode-buttons">
-  <button class="mode-btn both active" id="modeBoth" onclick="setMode('both')">Both</button>
-  <button class="mode-btn mult" id="modeMult" onclick="setMode('mult')">✖ Only</button>
-  <button class="mode-btn div" id="modeDiv" onclick="setMode('div')">➗ Only</button>
+<div style="text-align:center">
+  <div class="mode-toggle">
+    <button class="mode-opt mult active" id="modeMult" onclick="setMode('mult')">✖ Multiplication</button>
+    <button class="mode-opt div" id="modeDiv" onclick="setMode('div')">➗ Division</button>
+    <button class="mode-opt both" id="modeBoth" onclick="setMode('both')">Both</button>
+  </div>
 </div>
 
 <div class="card">
@@ -914,14 +960,14 @@ h1 {
 
   <div class="visual-area" id="visualArea">
     <div class="method-picker" id="methodPicker" style="display:none">
-      <button class="method-btn active" id="methodBreakBtn" onclick="setMethod('break')" data-t="methodBreakApart">🧩 Break apart</button>
-      <button class="method-btn" id="methodColBtn" onclick="setMethod('column')" data-t="methodColumn">📝 Column method</button>
+      <button class="method-btn" id="methodBreakBtn" onclick="setMethod('break')" data-t="methodBreakApart">🧩 Break apart</button>
+      <button class="method-btn active" id="methodColBtn" onclick="setMethod('column')" data-t="methodColumn">📝 Column method</button>
     </div>
-    <div id="methodBreakContent" class="method-tab-content">
+    <div id="methodBreakContent" class="method-tab-content" style="display:none">
       <div class="visual-title" id="visualTitle"></div>
       <div class="groups-container" id="groupsContainer"></div>
     </div>
-    <div id="methodColumnContent" class="method-tab-content" style="display:none">
+    <div id="methodColumnContent" class="method-tab-content">
       <div id="workings"></div>
     </div>
   </div>
@@ -966,7 +1012,7 @@ const TRANSLATIONS = {
     // Score bar
     score: "Score", streak: "Streak", level: "Level", triesLeft: "Tries left",
     // Mode buttons
-    both: "Both", multOnly: "✖ Only", divOnly: "➗ Only",
+    both: "Both", multOnly: "✖ Multiplication", divOnly: "➗ Division",
     // Game UI
     check: "Check! ✓",
     showAnswer: "Show me the answer",
@@ -1042,7 +1088,7 @@ const TRANSLATIONS = {
     startGame: "Starta spelet! 🚀",
     easy: "Lätt", medium: "Medel", hard: "Svår", expert: "Expert", master: "Mästare", champion: "Mästare+",
     score: "Poäng", streak: "Svit", level: "Nivå", triesLeft: "Försök kvar",
-    both: "Båda", multOnly: "✖ Bara", divOnly: "➗ Bara",
+    both: "Båda", multOnly: "✖ Multiplikation", divOnly: "➗ Division",
     check: "Kolla! ✓",
     showAnswer: "Visa svaret",
     nextQuestion: "Nästa fråga ➜",
@@ -1107,7 +1153,7 @@ let lang = 'en';
 function t(key) { return TRANSLATIONS[lang][key] || TRANSLATIONS.en[key] || key; }
 
 /* ───────── GAME STATE ───────── */
-let mode = 'both';
+let mode = 'mult';
 let questionMode = 'mult';
 let score = 0;
 let streak = 0;
@@ -1119,7 +1165,7 @@ let bestStreak = 0;
 let startingLevel = 1;
 let currentA = 0;
 let currentB = 0;
-let helpMethod = 'break'; // 'break' or 'column'
+let helpMethod = 'column'; // 'break' or 'column'
 
 /* ───────── HELP METHOD PICKER ───────── */
 function setMethod(method) {
@@ -1355,8 +1401,8 @@ function startGame() {
 /* ───────── MODE SWITCHING ───────── */
 function setMode(m) {
   mode = m;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.mode-btn.' + m).classList.add('active');
+  document.querySelectorAll('.mode-opt').forEach(b => b.classList.remove('active'));
+  document.querySelector('.mode-opt.' + m).classList.add('active');
   generateQuestion();
 }
 
@@ -1548,8 +1594,7 @@ function renderVisualMult(a, b, total) {
     const parts = breakApart(a, b);
     const barColors = ['#e74c3c', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
 
-    document.getElementById('visualTitle').textContent =
-      t('breakApart').replace('{a}', a).replace('{b}', b);
+    document.getElementById('visualTitle').textContent = '';
 
     let html = '<div class="break-apart">';
     parts.forEach((p, i) => {
@@ -1806,7 +1851,7 @@ function buildMultWorkings(a, b) {
 
   const placeNames = t('placeNames');
   let html = '<div class="mult-workings">';
-  html += `<div style="text-align:center;font-weight:bold;color:#888;margin-bottom:12px;font-size:0.95em;">${t('columnMethod')}</div>`;
+  // Column method content (no description text)
   html += makeColTable(tableRows, isMultiDigit);
 
   if (!isMultiDigit) {
@@ -1889,6 +1934,56 @@ function updateNextFocus() {
   }
 }
 
+function spawnDigitCheck(el) {
+  const rect = el.getBoundingClientRect();
+  const check = document.createElement('div');
+  check.textContent = '✓';
+  check.style.cssText = `position:fixed;z-index:10000;pointer-events:none;
+    font-size:1.2em;font-weight:900;color:#27ae60;
+    left:${rect.left + rect.width/2 - 8}px;top:${rect.top - 4}px;
+    transition:all 0.6s ease-out;opacity:1`;
+  document.body.appendChild(check);
+  requestAnimationFrame(() => {
+    check.style.top = (rect.top - 28) + 'px';
+    check.style.opacity = '0';
+    check.style.transform = 'scale(1.3)';
+  });
+  setTimeout(() => check.remove(), 650);
+}
+
+function spawnRowCelebration(rowEl) {
+  const rect = rowEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const emojis = ['✨','⭐','🌟','💫','✅'];
+  for (let i = 0; i < 6; i++) {
+    const s = document.createElement('div');
+    s.className = 'star-burst';
+    s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    s.style.fontSize = '1.2em';
+    const angle = (i / 6) * Math.PI * 2;
+    const dist = 40 + Math.random() * 40;
+    const dist2 = dist + 30;
+    s.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    s.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+    s.style.setProperty('--dx2', Math.cos(angle) * dist2 + 'px');
+    s.style.setProperty('--dy2', Math.sin(angle) * dist2 - 20 + 'px');
+    s.style.left = cx + 'px'; s.style.top = cy + 'px';
+    s.style.animationDelay = Math.random() * 0.15 + 's';
+    s.style.animationDuration = '0.8s';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1000);
+  }
+  // "Nice!" text bubble
+  const nice = document.createElement('div');
+  nice.className = 'celebration-text';
+  nice.style.cssText = `font-size:1.8em;top:${cy}px;left:${cx}px`;
+  const phrases = ['Nice!', 'Got it!', 'Yes!', '👏', '💪'];
+  nice.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.body.appendChild(nice);
+  setTimeout(() => nice.remove(), 1000);
+}
+
 function checkDigit(el) {
   const val = el.value.trim();
   if (!val) return;
@@ -1899,6 +1994,8 @@ function checkDigit(el) {
     el.classList.add('correct');
     el.classList.add('digit-pop');
     el.readOnly = true;
+    // Floating checkmark
+    spawnDigitCheck(el);
     // Reveal the carry for the column to the LEFT of the just-entered digit
     const rowName = el.dataset.row;
     const col = parseInt(el.dataset.col);
@@ -1946,9 +2043,12 @@ function checkDigit(el) {
 function onRowComplete(rowName) {
   if (rowName.startsWith('partial')) {
     const idx = parseInt(rowName.replace('partial', ''));
-    // Mark row visually complete
+    // Mark row visually complete with celebration
     const row = document.getElementById('workingPartial' + idx);
-    if (row) row.classList.add('row-complete');
+    if (row) {
+      row.classList.add('row-complete');
+      spawnRowCelebration(row);
+    }
 
     // Check if all partial rows are done
     const allPartialInputs = document.querySelectorAll('.digit-input[data-row^="partial"]');
@@ -1964,9 +2064,20 @@ function onRowComplete(rowName) {
     }
   } else if (rowName === 'result') {
     const row = document.getElementById('workingResultRow');
-    if (row) row.classList.add('row-complete');
+    if (row) {
+      row.classList.add('row-complete');
+      spawnRowCelebration(row);
+    }
     const label = document.getElementById('workingFinalLabel');
     if (label) { label.textContent = '✓ ' + t('allStepsSolved'); label.style.color = '#27ae60'; }
+    // Move cursor to the main answer input so the user can type the final answer
+    setTimeout(() => {
+      const ansInput = document.getElementById('answerInput');
+      if (ansInput && !ansInput.readOnly) {
+        ansInput.focus();
+        ansInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 300);
   }
 }
 
