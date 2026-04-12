@@ -5,8 +5,10 @@ A single-file HTML/CSS/JS math game for kids — no build tools, no frameworks.
 ## Project structure
 
 - `index.html` — the entire app (HTML + CSS + JS in one file)
-- `tests/game.spec.js` — Playwright end-to-end tests
-- `playwright.config.js` — test configuration (runs against local file)
+- `testing/` — all test infrastructure (kept separate so the root stays dependency-free)
+  - `tests/game.spec.js` — Playwright end-to-end tests
+  - `playwright.config.js` — test configuration (runs against `../index.html`)
+  - `package.json` — dev dependencies (Playwright)
 
 ## Key conventions
 
@@ -24,7 +26,7 @@ A single-file HTML/CSS/JS math game for kids — no build tools, no frameworks.
 - **3-strike reveal**: after 3 wrong attempts on a question, "Show answer" button appears
 - **Visual aids**: apple groups (small), apple grid (medium), interactive break-apart sub-problems (large)
 - **Interactive column multiplication**: digit-by-digit input with carry reveals and row celebrations (large numbers)
-- **Interactive bus-stop long division**: digit-by-digit quotient entry with carry/remainder superscripts, working steps, and a multiples reference table (levels 1–8, dividend >= 100)
+- **Interactive bus-stop long division**: digit-by-digit quotient entry with carry/remainder superscripts, working steps, and a multiples reference table (from level 4, dividend >= 100)
 - **Step-by-step workings**: toggleable long multiplication and division walkthroughs
 - **Multi-language**: English and Swedish
 

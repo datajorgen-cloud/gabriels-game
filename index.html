@@ -783,6 +783,13 @@ h1 {
 }
 .bus-stop-complete.visible { display: block; }
 
+/* Equation label pinned above bus-stop */
+.bs-equation-label {
+  width: 100%; text-align: center; font-size: 1.1em; font-weight: 700;
+  color: #2c3e50; margin-bottom: 8px; padding: 4px 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
 /* Multiples helper table */
 .bus-stop-wrapper {
   display: inline-flex; align-items: flex-start; gap: 18px;
@@ -811,6 +818,12 @@ h1 {
   .bus-stop-divisor { padding-top: 34px; }
   .bus-stop-wrapper { gap: 10px; }
   .bs-multiples { font-size: 0.78em; padding: 8px 10px; min-width: 100px; }
+  .bs-equation-label { font-size: 0.95em; }
+  .bus-stop-step-group.bs-collapsed {
+    max-height: 0; overflow: hidden; opacity: 0;
+    padding: 0; margin: 0; border-width: 0;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+  }
 }
 @media (max-width: 380px) {
   .bus-stop-container { font-size: 1em; padding: 10px 10px 14px; }
@@ -2255,7 +2268,7 @@ function renderDivision(total, divisor) {
   }
 
   // Show interactive bus-stop for larger divisions, static workings for simple ones
-  const isLargeDivision = level >= 4 && level <= 8 && String(total).length > String(divisor).length;
+  const isLargeDivision = level >= 4 && String(total).length > String(divisor).length;
   const busStopEl = document.getElementById('divBusStop');
   const stepsLabel = document.getElementById('stepsToggleLabel');
 
@@ -2402,6 +2415,7 @@ function buildDivBusStop(dividend, divisor) {
   </div>`;
 
   const html = `<div class="bus-stop-wrapper">
+    <div class="bs-equation-label">${dividend} ÷ ${divisor} = ?</div>
     <div class="bus-stop-container">
       <div class="bus-stop-divisor">${divisor}</div>
       <div class="bus-stop-main">
@@ -2481,9 +2495,14 @@ function checkDivDigit(el) {
       if (multRow) multRow.classList.add('bs-mult-highlight');
     }
 
-    // Show working step
+    // Show working step, collapse previous steps on mobile
     const stepGroup = container.querySelector(`.bus-stop-step-group[data-step="${step}"]`);
-    if (stepGroup) stepGroup.classList.add('visible');
+    if (stepGroup) {
+      stepGroup.classList.add('visible');
+      container.querySelectorAll('.bus-stop-step-group.visible').forEach(g => {
+        if (parseInt(g.dataset.step) < step) g.classList.add('bs-collapsed');
+      });
+    }
 
     // Reveal carry/remainder digit on the next dividend digit
     const s = steps[step];
@@ -2504,10 +2523,13 @@ function checkDivDigit(el) {
       const complete = document.getElementById('bsComplete');
       complete.classList.add('visible');
       spawnRowCelebration(container.querySelector('.bus-stop-answer-row'));
-      // Auto-focus main answer input
+      // Auto-focus and scroll to main answer input
       setTimeout(() => {
         const mainInput = document.getElementById('answerInput');
-        if (mainInput) mainInput.focus();
+        if (mainInput) {
+          mainInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          mainInput.focus();
+        }
       }, 600);
     } else {
       // Enable next input
